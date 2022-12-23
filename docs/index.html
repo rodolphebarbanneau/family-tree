@@ -1,1 +1,80 @@
-Hello World!
+<!doctype html>
+<html lang="en" class="h-100">
+
+  <head>
+    <meta charset="utf-8">
+    <title>Family Tree</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Build a family tree on Adobe Illustrator with some csv data.">
+    <!-- styles -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- scripts -->
+    <script type="module" src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/svg-pan-zoom.min.js"></script>
+  </head>
+
+  <body class="h-100">
+    <div id="header" class="container-fluid m-0 p-0">
+      <div class="row d-flex flex-nowrap m-2 p-0">
+        <div class="col d-flex flex-row flex-wrap align-self-start justify-content-start m-0 p-0">
+          <a id="project" class="control btn btn-sm btn-primary text-nowrap me-2 mb-2" href="https://github.com/rodolphebarbanneau/family-tree">Project</a>
+          <a id="dist" class=" control btn btn-sm btn-outline-primary text-nowrap me-2 mb-2" href="https://github.com/rodolphebarbanneau/family-tree/tree/main/dist">/dist</a>
+          <a id="dist" class=" control btn btn-sm btn-outline-primary text-nowrap me-1 mb-2" href="https://github.com/rodolphebarbanneau/family-tree/tree/main/src">/src</a>
+        </div>
+        <div class="col d-flex flex-row flex-wrap align-self-start justify-content-end m-0 p-0">
+          <button id="zoom-in" class="control btn btn-sm btn-light text-nowrap ms-1 mb-2">Zoom in</button>
+          <button id="zoom-out" class="control btn btn-sm btn-light text-nowrap ms-2 mb-2">Zoom out</button>
+          <button id="reset" class="control btn btn-sm btn-warning text-nowrap ms-2 mb-2">Reset</button>
+        </div>
+      </div>
+    </div>
+    <div id="view" class="d-flex flex-fill align-items-center justify-content-center"></div>
+      <object id="svg" class="bg-dark" type="image/svg+xml" data="family-tree.svg">Your browser does not support SVG :'(</object>
+    </div>
+
+    <script>
+      /** Initialize */
+      function initialize() {
+        // load svg pan zoom
+        const svg = svgPanZoom('#svg', {
+          panEnabled: true,
+          zoomEnabled: true,
+          controlIconsEnabled: false,
+          zoomScaleSensitivity: 0.5,
+          minZoom: 0.1,
+          maxZoom: 10,
+        });
+        // zoom in
+        document.getElementById('zoom-in').addEventListener('click', function(event) {
+          event.preventDefault();
+          svg.zoomIn();
+        });
+        // zoom out
+        document.getElementById('zoom-out').addEventListener('click', function(event) {
+          event.preventDefault();
+          svg.zoomOut();
+        });
+        // reset
+        document.getElementById('reset').addEventListener('click', function(event) {
+          event.preventDefault();
+          svg.resetZoom();
+          svg.center();
+        });
+        // resize
+        const resize = new ResizeObserver(() => {
+          svg.resize();
+          svg.center();
+        });
+        resize.observe(document.body);
+      }
+
+      /** Execute on load */
+      window.addEventListener('load', function () {
+        initialize();
+      });
+    </script>
+  </body>
+
+</html>

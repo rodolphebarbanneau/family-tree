@@ -1,0 +1,26 @@
+{
+  "name": "family-tree",
+  "private": false,
+  "type": "commonjs",
+  "version": "1.0.0",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rodolphebarbanneau/family-tree.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rodolphebarbanneau/family-tree/issues"
+  },
+  "homepage": "https://github.com/rodolphebarbanneau/family-tree#readme",
+  "keywords": [
+    "family",
+    "tree"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Rodolphe Barbanneau",
+    "email": "rodolphe.barbanneau@gmail.com"
+  },
+  "devDependencies": {},
+  "dependencies": {}
+}

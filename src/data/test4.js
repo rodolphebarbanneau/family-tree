@@ -9,7 +9,7 @@
  * ------------------------------------------------------------------------------
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Christian Hoffmeister
+ * Copyright (c) 2022 Rodolphe Barbanneau
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the 'Software'), to deal
@@ -109,9 +109,11 @@ function initializeData() {
   data.populate = function (source) {
     // root
     const root = {
-      anchor: null,
-      node: null,
       id: null,
+      type: 'descendant',
+      node: null,
+      anchor: null,
+      children: [],
       layout: {
         generation: 0,
         index: 0,
@@ -131,8 +133,6 @@ function initializeData() {
         // filter check
         if (record[9] === '1') {
           this.push({
-            anchor: null,
-            node: null,
             id: nullify(record[0]),
             type: nullify(record[1]),
             firstName: nullify(record[2]),
@@ -142,6 +142,9 @@ function initializeData() {
             death: nullify(record[6]),
             wedding: nullify(record[7]),
             parent: nullify(record[8]),
+            node: null,
+            anchor: null,
+            children: [],
             layout: {
               generation: 0,
               index: 0,
@@ -168,11 +171,13 @@ function initializeData() {
         if (data[i].parent === data[index].id) {
           // update anchor reference
           data[i].anchor = data[index];
+          // update children reference
+          data[index].children.push(data[i]);
           // update generation
-          if (data[i].type === 'spouse') {
-            data[i].layout.generation = data[index].layout.generation;
-          } else {
+          if (data[i].type === 'descendant') {
             data[i].layout.generation = data[index].layout.generation + 1;
+          } else {
+            data[i].layout.generation = data[index].layout.generation;
           }
           // recurse
           recursive(data, i);
@@ -182,7 +187,10 @@ function initializeData() {
     // compute node
     for (var i = 1; i < this.length; i += 1) {
       var node = this[i].anchor;
-      while (node && this[i].layout.generation === node.layout.generation) {
+      while (node && (
+        node.type !== 'descendant'
+        || this[i].layout.generation === node.layout.generation
+      )) {
         node = node.anchor;
       }
       this[i].node = node;
@@ -202,7 +210,7 @@ function initializeTree() {
   const tree = [];
 
   /**
-   * Populate tree  (split source input data by generations).
+   * Populate tree  (split source descendant by generations).
    * @param source - The source input data.
    */
   tree.populate = function populate(source) {
@@ -214,7 +222,8 @@ function initializeTree() {
       index += 1;
       // fetch data
       for (var i = 0; i < source.length; i += 1) {
-        if (source[i].layout.generation === index) {
+        if (source[i].type === 'descendant'
+          && source[i].layout.generation === index) {
           row.push(source[i]);
         }
       }
@@ -227,29 +236,28 @@ function initializeTree() {
    */
   tree.organize = function organize() {
     for (var g = 1; g < this.length; g += 1) {
-      // base sort
+      // generation sort
       this[g].sort(function (a, b) {
         if (a.node.layout.index < b.node.layout.index) return -1;
-        if (a.type < b.type) return -1;
+        if (a.anchor.layout.index < b.anchor.layout.index) return -1;
         if (a.id < b.id) return -1;
-      })
+      });
       // spouse sort
       for (var i = 0; i < this[g].length; i += 1) {
-        if (this[g][i].type === 'spouse') {
-          for (var j = 0; j < this[g].length; j += 1) {
-            if (this[g][j].id === this[g][i].parent) {
-              this[g].splice(
-                j + (this[g][j].sex === 'male' ? 1 : 0),
-                0,
-                this[g].splice(i, 1)[0],
-              );
-            }
-          }
+        this[g][i].children.sort(function (a, b) {
+          if (a.id < b.id) return -1;
+        });
+        // children sort
+        for (var k = 0; k < this[g][i].children.length; k += 1) {
+          this[g][i].children[k].children.sort(function (a, b) {
+            if (a.id < b.id) return -1;
+          });
         }
-      }
-      // index
-      for (var i = 0; i < this[g].length; i += 1) {
+        // indexing
         this[g][i].layout.index = i;
+        for (var k = 0; k < this[g][i].children.length; k += 1) {
+          this[g][i].children[k].layout.index = k;
+        }
       }
     }
     return this;
@@ -259,38 +267,45 @@ function initializeTree() {
    * Process tree.
    */
   tree.process = function process() {
-    // compute width
+    // compute size
     for (var g = this.length - 1; g > 0; g -= 1) {
       for (var i = 0; i < this[g].length; i += 1) {
-        // check width
-        if (this[g][i].layout.size === 0) {
-          // add template width
-          this[g][i].layout.size += params.template.width;
-          // add template spacing
-          if (i === this[g].length - 1) {
-            this[g][i].layout.size += params.spacing.h.group[0];
-          } else if (this[g][i].id === this[g][i + 1].parent || this[g][i].parent === this[g][i + 1].id) {
-            this[g][i].layout.size += params.spacing.h.spouse[0];
-          } else {
-            this[g][i].layout.size += params.spacing.h.descendant[0];
+        // add spouse size
+        for (var k = 0; k < this[g][i].children.length; k += 1) {
+          if (this[g][i].children[k].layout.size === 0) {
+            this[g][i].children[k].layout.size = params.template.width
+              + params.spacing.h.spouse[0];
           }
+          this[g][i].layout.size += this[g][i].children[k].layout.size;
+        }
+        // check spouse size
+        if (this[g][i].layout.size
+          < ((1 + this[g][i].children.length) * params.template.width)
+            + (this[g][i].children.length * params.spacing.h.spouse[0])
+        ) {
+          this[g][i].layout.size += params.template.width;
+        }
+        // add template spacing
+        if (i === this[g].length - 1 || this[g][i].node !== this[g][i + 1].node) {
+          this[g][i].layout.size += params.spacing.h.group[0];
+        } else {
+          this[g][i].layout.size += params.spacing.h.descendant[0];
         }
         // cumulate size
-        this[g][i].node.layout.size += this[g][i].layout.size;
+        this[g][i].anchor.layout.size += this[g][i].layout.size;
       }
     }
     // compute coordinates
     for (var g = 1; g < this.length; g += 1) {
-      var node, shift;
+      var shift;
       for (var i = 0; i < this[g].length; i += 1) {
-        // initialize node
-        if (i === 0 || node !== this[g][i].node) {
-          node = this[g][i].node;
+        // initialize shift
+        if (i === 0 || this[g][i - 1].node !== this[g][i].node) {
           shift = 0;
         }
         // coordinnates
-        this[g][i].layout.left = node.layout.left - (node.layout.size / 2) + shift;
-        this[g][i].layout.top = node.layout.top
+        this[g][i].layout.left = this[g][i].node.layout.left - (this[g][i].node.layout.size / 2) + shift;
+        this[g][i].layout.top = this[g][i].node.layout.top
           + params.template.height
           + params.spacing.v.before
           + params.spacing.v.after;
@@ -308,69 +323,6 @@ function initializeTree() {
     return this;
   }
 
-  /**
-   * Draw tree.
-   */
-  tree.draw = function draw(app, root) {
-    // progress window
-    function progress(steps) {
-      // initialize
-      const win = new Window('palette', 'Populating family tree...', undefined, {closeButton: false});
-      const tab = win.add('statictext');
-      tab.preferredSize = [450, -1];
-      const bar = win.add('progressbar', undefined, 0, steps);
-      bar.preferredSize = [450, -1];
-      // methods
-      progress.close = function () { win.close(); };
-      progress.increment = function () { bar.value += 1; return bar.value; };
-      progress.message = function (message) { tab.text = message; win.update(); win.show(); };
-      // show
-      win.show();
-    }
-    // initialize document
-    const doc = app.activeDocument;
-    const body = doc.layers.getByName('body');
-    // initialize steps
-    var steps = 0;
-    for (var g = 1; g < this.length; g += 1) {
-      steps += this[g].length;
-    }
-    // check document and steps
-    if (body && steps > 0) {
-      // load template
-      const template = app.open(new File(root + '/template.ai'));
-      // load progress
-      progress(steps);
-      // draw tree
-      var target;
-      for (var g = this.length - 1; g > 0; g -= 1) {
-        for (var i = this[g].length - 1; i >= 0; i -= 1) {
-          // progress increment
-          progress.message('Drawing element: ' + progress.increment());
-          // import template
-          target = template.groupItems[0].duplicate(
-            body,
-            ElementPlacement.PLACEATBEGINNING,
-          );
-          // edit template
-          target.name = coalesce(this[g][i].id, '<undefined>');
-          target.textFrames.getByName('first-name').contents = coalesce(this[g][i].firstName, '<undefined>');
-          target.textFrames.getByName('last-name').contents = coalesce(this[g][i].lastName, '<undefined>');
-          target.textFrames.getByName('birth').contents = coalesce(this[g][i].birth, '');
-          target.textFrames.getByName('death').contents = coalesce(this[g][i].death, '');
-          // place template
-          target.left = coalesce(mmToPoints(this[g][i].layout.left) - (target.width / 2), 0);
-          target.top = coalesce(-mmToPoints(this[g][i].layout.top), 0);
-        }
-      }
-      // unload template
-      template.close(SaveOptions.DONOTSAVECHANGES);
-      // progress close
-      progress.close();
-    }
-    return this;
-  }
-
   return tree;
 }
 
@@ -378,14 +330,30 @@ function initializeTree() {
  * Script entry point.
  */
 (function () {
-  // initialize
-  const script = new File($.fileName);
-  const root = script.parent.fsName;
-  // load data
-  const csv = File(root + '/data.csv');
-  csv.open('r');
-  const text = csv.read().split(/\r?\n/);
-  csv.close();
+  const text =
+`id,type,first_name,last_name,sex,birth,death,wedding,parent,check,relationship
+02-07,descendant,Gilles,Barbaneau,male,,,,01-04,1,[descendant] Gilles BARBANEAU -> Catherine LEFER
+02-08,spouse,Catherine,Maugeay,female,,,,02-07,1,[spouse] Catherine MAUGEAY -> Gilles BARBANEAU
+02-09,descendant,Guillaume,Barbaneau,male,,,,01-04,1,[descendant] Guillaume BARBANEAU -> Catherine LEFER
+02-10,spouse,Jehanne,Cuit,female,,,,02-09,1,[spouse] Jehanne CUIT -> Guillaume BARBANEAU
+02-11,descendant,François,Barbaneau,male,,1659,,01-04,1,[descendant] François BARBANEAU -> Catherine LEFER
+02-12,spouse,Marie,Ollivier,female,,1668,,02-11,1,[spouse] Marie OLLIVIER -> François BARBANEAU
+02-13,descendant,Jehan,Barbaneau,male,,,,01-04,1,[descendant] Jehan BARBANEAU -> Catherine LEFER
+02-14,spouse,Anne,Prieur,female,,,,02-13,1,[spouse] Anne PRIEUR -> Jehan BARBANEAU
+01-01,spouse,François,Baussay,male,,,,01-02,1,[spouse] François BAUSSAY -> Agathe BARBANEAU
+01-02,descendant,Agathe,Barbaneau,female,,,,,1,[descendant] Agathe BARBANEAU -> undefined
+01-03,descendant,Valentin,Barbaneau,male,,,,,1,[descendant] Valentin BARBANEAU -> undefined
+01-04,spouse,Catherine,Lefer,female,,,,01-03,1,[spouse] Catherine LEFER -> Valentin BARBANEAU
+01-05,descendant,Michel,Barbaneau,male,,,,,1,[descendant] Michel BARBANEAU -> undefined
+02-01,descendant,Jehan,Barbaneau,male,,,,01-04,1,[descendant] Jehan BARBANEAU -> Catherine LEFER
+02-02,spouse,Louise,Maujais,female,,,,02-01,1,[spouse] Louise MAUJAIS -> Jehan BARBANEAU
+02-03,spouse,Pierre,Simonnet,male,,,1596,02-04,1,[spouse] Pierre SIMONNET -> Agathe BARBANEAU
+02-04,descendant,Agathe,Barbaneau,female,,,,01-04,1,[descendant] Agathe BARBANEAU -> Catherine LEFER
+02-05,descendant,Michel,Barbaneau,male,,,,01-04,1,[descendant] Michel BARBANEAU -> Catherine LEFER
+02-06,spouse,Marie,Maugeais,female,,,,02-05,1,[spouse] Marie MAUGEAIS -> Michel BARBANEAU
+
+  `.split(/\r?\n/);
+
   // initialize data
   const data = initializeData()
     .populate(text)
@@ -395,8 +363,7 @@ function initializeTree() {
     .populate(data)
     .organize()
     .process()
-    .compress()
-    .draw(app, root);
+    .compress();
   // finalize
   alert('success');
 })();

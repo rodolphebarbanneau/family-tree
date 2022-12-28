@@ -36,7 +36,7 @@ const params = {
   // template origin (millimeters)
   origin: {
     left: 594.50,
-    top: 100.00,
+    top: 90.00,
   },
   // template size (millimeters)
   size: {
@@ -49,27 +49,6 @@ const params = {
     vertical: [9.90, 16.00],
   },
 };
-
-
-/**
- * Coalesce a value.
- * @param field - The value.
- * @returns The coalesced value.
- */
-function coalesce(value, other) {
-  return value ? value : other;
-}
-
-/**
- * Convert a measure from millimeters to points.
- * @param measure - The measure in millimeters.
- * @returns The measure in points.
- */
-function mmToPoints(measure) {
-  // mm conversion factor
-  const points = 2.83464566929134;
-  return measure * points;
-}
 
 /**
  * Nullify a value.
@@ -99,7 +78,7 @@ function getNode(record) {
 
   /** Initialize node data fields. */
   node.id = record ? nullify(record[1]) : null;
-  node.lineage = record ? nullify(record[2]) === 'true' : 'true';
+  node.lineage = record ? nullify(record[2]) === 'true' : null;
   node.firstName = record ? nullify(record[3]) : null;
   node.lastName = record ? nullify(record[4]) : null;
   node.sex = record ? nullify(record[5]) : null;
@@ -112,8 +91,8 @@ function getNode(record) {
   node.level = 0;
   node.index = 0;
   node.ancestor = null;
-  node.parent = record ? null : node;
-  node.spouses = record ? [] : [node];
+  node.parent = null;
+  node.spouses = [];
   node.children = [];
   node.elements = [];
 
@@ -121,11 +100,8 @@ function getNode(record) {
   node.layout = {
     width: 0,
     margins: [0, 0],
-    left: params.origin.left
-      - params.size.width,
-    top: params.origin.top
-      - params.spacing.vertical[0]
-      - params.spacing.vertical[1],
+    left: params.origin.left - params.size.width,
+    top: params.origin.top - params.size.height,
   };
 
   /** Return node. */
@@ -147,6 +123,8 @@ function getTree(data) {
     const nodes = [];
     // create root node
     nodes.push(getNode());
+    nodes[0].parent = nodes[0];
+    nodes[0].spouses = [nodes[0]];
     // populate nodes from data records
     for (var i = 1; i < data.length; i += 1) {
       // filter void
@@ -327,9 +305,16 @@ function getTree(data) {
     return this;
   };
 
-  /** Draw tree. */
-  tree.draw = function draw(app, root) {
-    // progress window
+  /**
+   * Render the tree in the active document.
+   * @param app - The application.
+   * @returns The tree.
+   */
+  tree.render = function render(app) {
+    /**
+     * Initialize a progress window.
+     * @param steps - The total number of steps.
+     */
     function progress(steps) {
       // initialize
       const win = new Window('palette', 'Populating family tree...', undefined, {closeButton: false});
@@ -345,66 +330,151 @@ function getTree(data) {
       win.show();
     }
 
-    // draw template
-    function drawTemplate(body, template, element) {
-      // import template
-      const target = template.groupItems[0].duplicate(
-        body,
-        ElementPlacement.PLACEATBEGINNING,
-      );
-      // edit template
-      target.name = coalesce(element.id, '<undefined>');
-      target.textFrames.getByName('first-name').contents = coalesce(element.firstName, '<undefined>');
-      target.textFrames.getByName('last-name').contents = coalesce(element.lastName, '<undefined>');
-      target.textFrames.getByName('birth').contents = coalesce(element.birth, '');
-      target.textFrames.getByName('death').contents = coalesce(element.death, '');
-      // place template
-      target.left = coalesce(mmToPoints(element.layout.left), 0);
-      target.top = coalesce(-mmToPoints(element.layout.top), 0);
-    }
-
-    // draw relationship
-    function drawRelationship(body, element) {
-    }
-
-    // initialize document
-    const doc = app.activeDocument;
-    const body = doc.layers.getByName('body');
-    // initialize steps
-    var steps = 0;
-    for (var l = 1; l < tree.levels.length; l += 1) {
-      for (var i = 1; i < tree.levels[l].length; i += 1) {
-        steps += tree.levels[l][i].elements.length + 1;
+    /**
+     * Process a tree node drawing.
+     * @param layer - The output layer.
+     * @param template - The template.
+     * @param node - The tree node to process.
+     */
+    function process(layer, template, node) {
+      // coalesce value
+      function coalesce(value, other) {
+        return value ? value : other;
       }
-    }
 
-    // check document and steps
-    if (body && steps > 0) {
-      // load template
-      const template = app.open(new File(root + '/template.ai'));
-      // load progress
-      progress(steps);
-      // draw tree
-      for (var l = tree.levels.length - 1; l > 0; l -= 1) {
-        for (var i = tree.levels[l].length - 1; i >= 0; i -= 1) {
-          // progress increment
-          progress.message('Drawing element ' + progress.increment() + '/' + steps + '...');
-          // draw elements template
-          for (var k = tree.levels[l][i].elements.length - 1; k >= 0; k -= 1) {
-            drawTemplate(body, template, tree.levels[l][i].elements[k]);
+      // duplicate template item
+      function duplicate(target, item) {
+        return item.duplicate(target, ElementPlacement.PLACEATBEGINNING);
+      }
+
+      // convert measure from millimeters to points
+      function mmToPoints(measure) {
+        const points = 2.83464566929134;
+        return measure * points;
+      }
+
+      // process node elements
+      for (var i = node.elements.length - 1; i >= 0; i -= 1) {
+        var output, vector;
+        // initialize output
+        if (node.elements[i].id || i === 0) {
+          output = layer.groupItems.add();
+          output.name = coalesce(node.elements[i].id, 'root');
+        }
+        // draw body
+        if (output && node.elements[i].id) {
+          // draw info template
+          if (node.elements[i].wedding) {
+            vector = duplicate(output, template.info);
+            vector.textFrames.getByName('wedding').contents = coalesce(node.elements[i].wedding, '');
+            vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
+            vector.top = coalesce(-mmToPoints(node.elements[i].layout.top - params.spacing.vertical[0]), 0);
           }
-          // draw elements relationship
+          // draw node template
+          vector = duplicate(output, template.node);
+          vector.textFrames.getByName('first-name').contents = coalesce(node.elements[i].firstName, '');
+          vector.textFrames.getByName('last-name').contents = coalesce(node.elements[i].lastName, '');
+          vector.textFrames.getByName('birth').contents = coalesce(node.elements[i].birth, '');
+          vector.textFrames.getByName('death').contents = coalesce(node.elements[i].death, '');
+          vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
+          vector.top = coalesce(-mmToPoints(node.elements[i].layout.top), 0);
+        }
+        // draw links
+        if (output && !node.elements[i].lineage) {
+          // initialize output
+          output.groupItems.add();
+          output.groupItems[0].name = 'links';
+          // draw link template
+          for (var j = node.elements[i].children.length - 1; j >= 0; j -= 1) {
+            // initialize draw
+            vector = duplicate(output.groupItems.getByName('links'), template.link);
+            vector.name = coalesce(node.elements[i].children[j].id, '<Undefined>');
+            // initialize coordinates
+            var coords = {};
+            coords.start = {
+              left: coalesce(mmToPoints(node.elements[i].layout.left + (params.size.width * (node.elements[i].id ? 0.5 : 1))), 0),
+              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height), 0),
+            };
+            coords.break = {
+              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[1]), 0),
+            };
+            coords.end = {
+              left: coalesce(mmToPoints(node.elements[i].children[j].layout.left + (0.5 * params.size.width)), 0),
+              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[0] + params.spacing.vertical[1]), 0),
+            };
+            // initialize item
+            var item;
+            // edit start item
+            item = vector.pathItems.getByName('start');
+            if (item) {
+              item.left = coords.start.left - (0.5 * item.width);
+              item.top = coords.start.top;
+            }
+            // edit line item
+            item = vector.pathItems.getByName('line');
+            if (item) {
+              if (item.pathPoints.length === 4) {
+                item.pathPoints[0].anchor = [coords.start.left, coords.start.top];
+                item.pathPoints[0].leftDirection = [coords.start.left, coords.start.top];
+                item.pathPoints[0].rightDirection = [coords.start.left, coords.start.top];
+
+                item.pathPoints[1].anchor = [coords.start.left, coords.break.top];
+                item.pathPoints[1].leftDirection = [coords.start.left, coords.break.top];
+                item.pathPoints[1].rightDirection = [coords.start.left, coords.break.top];
+
+                item.pathPoints[2].anchor = [coords.end.left, coords.break.top];
+                item.pathPoints[2].leftDirection = [coords.end.left, coords.break.top];
+                item.pathPoints[2].rightDirection = [coords.end.left, coords.break.top];
+
+                item.pathPoints[3].anchor = [coords.end.left, coords.end.top];
+                item.pathPoints[3].leftDirection = [coords.end.left, coords.end.top];
+                item.pathPoints[3].rightDirection = [coords.end.left, coords.end.top];
+              } else {
+                item.remove();
+              }
+            }
+            // edit end item
+            item = vector.pathItems.getByName('end');
+            if (item) {
+              item.left = coords.end.left - (0.5 * item.width);
+              item.top = coords.end.top + item.height;
+            }
+          }
         }
       }
-
-      // unload template
-      template.close(SaveOptions.DONOTSAVECHANGES);
-
-      // progress close
-      progress.close();
     }
 
+    /** Render. */
+
+    // initialize application context
+    const doc = app.activeDocument;
+    doc.artboards.setActiveArtboardIndex(0);
+    const layer = doc.layers.add();
+    layer.name = 'tree';
+    const template = doc
+      .layers.getByName('template')
+      .layers.getByName('items')
+      .groupItems;
+
+    // initialize progress steps
+    var steps = 0;
+    for (var l = 1; l < tree.levels.length; l += 1) {
+      steps += tree.levels[l].length;
+    }
+
+    // process tree
+    progress(steps);
+    for (var l = tree.levels.length - 1; l >= 0; l -= 1) {
+      for (var i = tree.levels[l].length - 1; i >= 0; i -= 1) {
+        // process node
+        progress.message('Drawing element ' + progress.increment() + '/' + steps + '...');
+        process(layer, template, tree.levels[l][i]);
+      }
+    }
+    progress.close();
+
     // return
+    layer.hasSelectedArtwork = false;
     return this;
   };
 
@@ -421,7 +491,7 @@ function getTree(data) {
   const root = script.parent.fsName;
 
   // data
-  const csv = File(root + '/data.csv');
+  const csv = File(root + '/data/tree.csv');
   csv.open('r');
   const data = csv.read().split(/\r?\n/);
   csv.close();
@@ -429,7 +499,7 @@ function getTree(data) {
   // tree
   const tree = getTree(data);
   tree.compress();
-  tree.draw(app, root);
+  tree.render(app);
 
   // finalize
   alert('success');

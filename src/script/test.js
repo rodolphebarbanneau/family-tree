@@ -393,6 +393,23 @@ function getTree(data) {
         result[1] = children[1] - node.layout.group;
       }
 
+
+      if (node.id === '03-28') {
+        console.log(way);
+        console.log(ancestors);
+        console.log(children);
+        console.log(node.layout.group);
+        console.log(result);
+        console.log('---------------------------------');
+      }
+      //if (result[1] < 0) {
+      //  console.log(ancestors);
+      //  console.log(children);
+      //  console.log(node.layout.group);
+      //  console.log(result);
+      //  console.log('---------------------------------');
+      //}
+
       if (way === 1) {
         return (result[1] !== null ? (Math.round(result[1] * 100) / 100) : null);
       } else {
@@ -402,6 +419,16 @@ function getTree(data) {
     }
 
     function space(a, b) {
+
+      //if (a.id === '03-28') {
+      //  console.log(a.layout.group);
+      //  console.log(b.layout.group);
+      //  console.log(a.layout.group < b.layout.group);
+      //  console.log(distance(a, b));
+      //  console.log(distance(a, b) - (a.layout.margins[1] + b.layout.margins[0]));
+      //  console.log('---------------------------------');
+      //}
+
       if (a.layout.group < b.layout.group) {
         return distance(a, b) - (a.layout.margins[1] + b.layout.margins[0]);
       } else {
@@ -411,6 +438,15 @@ function getTree(data) {
 
 
     function gap(a, b) { // from a to b (a moving)
+
+
+      //if (a.id === '03-01') {
+      //  console.log(spaceA);
+      //}
+
+      //if (a.firstName === 'Jehan' && a.lastName === 'Barbaneau') {
+      //  alert(constraintA);
+      //}
 
       var way;
       if (a.layout.group < b.layout.group) {
@@ -429,6 +465,26 @@ function getTree(data) {
         test = spaceA;
       }
       return Math.round(test * 100) / 100; //todo Math.abs()
+
+
+
+      // if (way === 1) {
+      //   if (constraintA[1] !== null) {
+      //     test = Math.min(spaceA, constraintA[1]);
+      //   } else {
+      //     test = spaceA;
+      //   }
+      // } else if (way === -1) {
+      //   if (constraintA[0] !== null) {
+      //     test = Math.min(spaceA, constraintA[0]);
+      //   } else {
+      //     test = spaceA;
+      //   }
+      // } else {
+      //   test = 0;
+      // }
+
+      //return (Math.round(test * 100) / 100);
     }
 
     function size(level) {
@@ -506,16 +562,11 @@ function getTree(data) {
           // left improvement
           var leftImprovement = 0
           for (var k = leftIndex; k < rightIndex; k += 1) {
-
-            //ok ancestor left
-            // find first gap
-            // find last/first constraint
-            // return min constraint
-
-
             var test = gap(level[k], level[k + 1]);
+            //if (level[k].id === '03-01') {
+            //  console.log(test);
+            //}
             if (test > 0) {
-
               leftIndex = k;
               leftImprovement = gap(level[k], level[k + 1]);
               break;
@@ -531,6 +582,9 @@ function getTree(data) {
             }
           }
 
+          //if (level[k].id === '03-26') {
+          //  console.log('---------------------------------');
+          //}
           improvement = Math.min(leftImprovement, rightImprovement);
           if (leftIndex === rightIndex - 1) {
             improvement = 0.5 * improvement;
@@ -563,178 +617,6 @@ function getTree(data) {
     return this;
   };
 
-  /**
-   * Render the tree in the active document.
-   * @param app - The application.
-   * @returns The tree.
-   */
-  tree.render = function render(app) {
-    /**
-     * Initialize a progress window.
-     * @param steps - The total number of steps.
-     */
-    function progress(steps) {
-      // initialize
-      const win = new Window('palette', 'Populating family tree...', undefined, {closeButton: false});
-      const tab = win.add('statictext');
-      tab.preferredSize = [450, -1];
-      const bar = win.add('progressbar', undefined, 0, steps);
-      bar.preferredSize = [450, -1];
-      // methods
-      progress.close = function () { win.close(); };
-      progress.increment = function () { bar.value += 1; return bar.value; };
-      progress.message = function (message) { tab.text = message; win.update(); win.show(); };
-      // show
-      win.show();
-    }
-
-    /**
-     * Process a tree node drawing.
-     * @param layer - The output layer.
-     * @param template - The template.
-     * @param node - The tree node to process.
-     */
-    function process(layer, template, node) {
-      // coalesce value
-      function coalesce(value, other) {
-        return value ? value : other;
-      }
-
-      // duplicate template item
-      function duplicate(target, item) {
-        return item.duplicate(target, ElementPlacement.PLACEATBEGINNING);
-      }
-
-      // convert measure from millimeters to points
-      function mmToPoints(measure) {
-        const points = 2.83464566929134;
-        return measure * points;
-      }
-
-      // process node elements
-      for (var i = node.elements.length - 1; i >= 0; i -= 1) {
-        var output, vector;
-        // initialize output
-        if (node.elements[i].id || i === 0) {
-          output = layer.groupItems.add();
-          output.name = coalesce(node.elements[i].id, 'root');
-        }
-        // draw body
-        if (output && node.elements[i].id) {
-          // draw info template
-          if (node.elements[i].wedding) {
-            vector = duplicate(output, template.info);
-            vector.textFrames.getByName('wedding').contents = coalesce(node.elements[i].wedding, '');
-            vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
-            vector.top = coalesce(-mmToPoints(node.elements[i].layout.top - params.spacing.vertical[0]), 0);
-          }
-          // draw node template
-          vector = duplicate(output, template.node);
-          vector.textFrames.getByName('first-name').contents = coalesce(node.elements[i].firstName, '');
-          vector.textFrames.getByName('last-name').contents = coalesce(node.elements[i].lastName, '');
-          vector.textFrames.getByName('birth').contents = coalesce(node.elements[i].birth, '');
-          vector.textFrames.getByName('death').contents = coalesce(node.elements[i].death, '');
-          vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
-          vector.top = coalesce(-mmToPoints(node.elements[i].layout.top), 0);
-        }
-        // draw links
-        if (output && !node.elements[i].lineage) {
-          // initialize output
-          output.groupItems.add();
-          output.groupItems[0].name = 'links';
-          // draw link template
-          for (var j = node.elements[i].children.length - 1; j >= 0; j -= 1) {
-            // initialize draw
-            vector = duplicate(output.groupItems.getByName('links'), template.link);
-            vector.name = coalesce(node.elements[i].children[j].id, '<Undefined>');
-            // initialize coordinates
-            var coords = {};
-            coords.start = {
-              left: coalesce(mmToPoints(node.elements[i].layout.left + (params.size.width * (node.elements[i].id ? 0.5 : 1))), 0),
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height), 0),
-            };
-            coords.break = {
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[1]), 0),
-            };
-            coords.end = {
-              left: coalesce(mmToPoints(node.elements[i].children[j].layout.left + (0.5 * params.size.width)), 0),
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[0] + params.spacing.vertical[1]), 0),
-            };
-            // initialize item
-            var item;
-            // edit start item
-            item = vector.pathItems.getByName('start');
-            if (item) {
-              item.left = coords.start.left - (0.5 * item.width);
-              item.top = coords.start.top;
-            }
-            // edit line item
-            item = vector.pathItems.getByName('line');
-            if (item) {
-              if (item.pathPoints.length === 4) {
-                item.pathPoints[0].anchor = [coords.start.left, coords.start.top];
-                item.pathPoints[0].leftDirection = [coords.start.left, coords.start.top];
-                item.pathPoints[0].rightDirection = [coords.start.left, coords.start.top];
-
-                item.pathPoints[1].anchor = [coords.start.left, coords.break.top];
-                item.pathPoints[1].leftDirection = [coords.start.left, coords.break.top];
-                item.pathPoints[1].rightDirection = [coords.start.left, coords.break.top];
-
-                item.pathPoints[2].anchor = [coords.end.left, coords.break.top];
-                item.pathPoints[2].leftDirection = [coords.end.left, coords.break.top];
-                item.pathPoints[2].rightDirection = [coords.end.left, coords.break.top];
-
-                item.pathPoints[3].anchor = [coords.end.left, coords.end.top];
-                item.pathPoints[3].leftDirection = [coords.end.left, coords.end.top];
-                item.pathPoints[3].rightDirection = [coords.end.left, coords.end.top];
-              } else {
-                item.remove();
-              }
-            }
-            // edit end item
-            item = vector.pathItems.getByName('end');
-            if (item) {
-              item.left = coords.end.left - (0.5 * item.width);
-              item.top = coords.end.top + item.height;
-            }
-          }
-        }
-      }
-    }
-
-    /** Render. */
-
-    // initialize application context
-    const doc = app.activeDocument;
-    doc.artboards.setActiveArtboardIndex(0);
-    const layer = doc.layers.add();
-    layer.name = 'tree';
-    const template = doc
-      .layers.getByName('template')
-      .layers.getByName('items')
-      .groupItems;
-
-    // initialize progress steps
-    var steps = 0;
-    for (var l = 1; l < tree.levels.length; l += 1) {
-      steps += tree.levels[l].length;
-    }
-
-    // process tree
-    progress(steps);
-    for (var l = tree.levels.length - 1; l >= 0; l -= 1) {
-      for (var i = tree.levels[l].length - 1; i >= 0; i -= 1) {
-        // process node
-        progress.message('Drawing element ' + progress.increment() + '/' + steps + '...');
-        process(layer, template, tree.levels[l][i]);
-      }
-    }
-    progress.close();
-
-    // return
-    layer.hasSelectedArtwork = false;
-    return this;
-  };
 
   /** Return tree. */
   return tree;
@@ -742,22 +624,62 @@ function getTree(data) {
 
 /** Script entry point. */
 (function () {
-  // initialize
-  const script = new File($.fileName);
-  const root = script.parent.fsName;
-
-  // data
-  const csv = File(root + '/data/tree.csv');
-  csv.open('r');
-  const data = csv.read().split(/\r?\n/);
-  csv.close();
+  const data =
+`check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,relationship
+1,01-01,false,François,Baussay,male,,,,01-02,François BAUSSAY -> Agathe BARBANEAU
+1,01-02,true,Agathe,Barbaneau,female,,,,,[x] Agathe BARBANEAU -> undefined
+1,01-03,true,Valentin,Barbaneau,male,,,,,[x] Valentin BARBANEAU -> undefined
+1,01-04,false,Catherine,Lefer,female,,,,01-03,Catherine LEFER -> Valentin BARBANEAU
+1,01-05,true,Michel,Barbaneau,male,,,,,[x] Michel BARBANEAU -> undefined
+1,02-01,true,Jehan,Barbaneau,male,,,,01-04,[x] Jehan BARBANEAU -> Catherine LEFER
+1,02-02,false,Louise,Maujais,female,,,,02-01,Louise MAUJAIS -> Jehan BARBANEAU
+1,02-03,false,Pierre,Simonnet,male,,,1596,02-04,Pierre SIMONNET -> Agathe BARBANEAU
+1,02-04,true,Agathe,Barbaneau,female,,,,01-04,[x] Agathe BARBANEAU -> Catherine LEFER
+1,02-05,true,Michel,Barbaneau,male,,,,01-04,[x] Michel BARBANEAU -> Catherine LEFER
+1,02-06,false,Marie,Maugeais,female,,,,02-05,Marie MAUGEAIS -> Michel BARBANEAU
+1,02-07,true,Gilles,Barbaneau,male,,,,01-04,[x] Gilles BARBANEAU -> Catherine LEFER
+1,02-08,false,Catherine,Maugeay,female,,,,02-07,Catherine MAUGEAY -> Gilles BARBANEAU
+1,02-09,true,Guillaume,Barbaneau,male,,,,01-04,[x] Guillaume BARBANEAU -> Catherine LEFER
+1,02-10,false,Jehanne,Cuit,female,,,,02-09,Jehanne CUIT -> Guillaume BARBANEAU
+1,02-11,true,François,Barbaneau,male,,1659,,01-04,[x] François BARBANEAU -> Catherine LEFER
+1,02-12,false,Marie,Ollivier,female,,1668,,02-11,Marie OLLIVIER -> François BARBANEAU
+1,02-13,true,Jehan,Barbaneau,male,,,,01-04,[x] Jehan BARBANEAU -> Catherine LEFER
+1,02-14,false,Anne,Prieur,female,,,,02-13,Anne PRIEUR -> Jehan BARBANEAU
+1,03-01,true,Thomas,Barbaneau,male,1615,1684,,02-02,[x] Thomas BARBANEAU -> Louise MAUJAIS
+1,03-02,false,Jehanne,Roy,female,,1664,,03-01,Jehanne ROY -> Thomas BARBANEAU
+1,03-03,true,Guillaume,Barbaneau,male,1611,1678,,02-02,[x] Guillaume BARBANEAU -> Louise MAUJAIS
+1,03-04,false,Jehanne,Martin,female,,1665,,03-03,Jehanne MARTIN -> Guillaume BARBANEAU
+1,03-05,false,Louis,Brunet,male,,,,03-06,Louis BRUNET -> Agathe BARBANEAU
+1,03-06,true,Agathe,Barbaneau,female,,,,02-02,[x] Agathe BARBANEAU -> Louise MAUJAIS
+1,03-07,false,René,Simonnet,male,1607,1682,1651,03-08,René SIMONNET -> Marie BARBANEAU
+1,03-08,true,Marie,Barbaneau,female,1610,,,02-02,[x] Marie BARBANEAU -> Louise MAUJAIS
+1,03-09,true,Michel,Barbaneau,male,,1693,,02-02,[x] Michel BARBANEAU -> Louise MAUJAIS
+1,03-10,false,Estor,Braseau,female,,1650,,03-09,Estor BRASEAU -> Michel BARBANEAU
+1,03-11,false,Perrine,Simonet,female,,1652,1651,03-09,Perrine SIMONET -> Michel BARBANEAU
+1,03-12,false,Marie,Sabouraud,female,1632,1687,,03-09,Marie SABOURAUD -> Michel BARBANEAU
+1,03-13,true,Pierre,Barbaneau,male,1618,,,02-06,[x] Pierre BARBANEAU -> Marie MAUGEAIS
+1,03-14,false,Marie,,female,,,,03-13,Marie  -> Pierre BARBANEAU
+1,03-15,true,François,,male,,1652,,02-06,[x] François  -> Marie MAUGEAIS
+1,03-16,true,Renée,,female,1612,,,02-08,[x] Renée  -> Catherine MAUGEAY
+1,03-17,false,Louis,Roy,male,,,,03-18,Louis ROY -> Catherine BARBANEAU
+1,03-18,true,Catherine,Barbaneau,female,1616,1683,,02-08,[x] Catherine BARBANEAU -> Catherine MAUGEAY
+1,03-19,false,René,Nau,male,1607,1687,,03-20,René NAU -> Marie BARBANEAU
+1,03-20,true,Marie,Barbaneau,female,1613,1693,,02-08,[x] Marie BARBANEAU -> Catherine MAUGEAY
+1,03-21,false,Pierre,Nau,male,1615,1685,,03-22,Pierre NAU -> Marguerite BARBANEAU
+1,03-22,true,Marguerite,Barbaneau,female,1618,,,02-08,[x] Marguerite BARBANEAU -> Catherine MAUGEAY
+1,03-23,true,Michel,,male,1618,1621,,02-08,[x] Michel  -> Catherine MAUGEAY
+1,03-24,true,Marie,,female,1622,,,02-10,[x] Marie  -> Jehanne CUIT
+1,03-25,true,Michel,,male,1617,,,02-10,[x] Michel  -> Jehanne CUIT
+1,03-26,true,Jean,Barbaneau,male,1615,,,02-14,[x] Jean BARBANEAU -> Anne PRIEUR
+1,03-27,false,Catherine,Mouneron,female,1616,,1640,03-26,Catherine MOUNERON -> Jean BARBANEAU
+1,03-28,true,François,Barbaneau,male,1618,,,02-14,[x] François BARBANEAU -> Anne PRIEUR
+`.split(/\r?\n/);
 
   // tree
   const tree = getTree(data);
   tree.compress();
-  tree.render(app);
 
   // finalize
-  //alert(tree.levels[1][0].layout.left)
-  // alert('success');
+  //console.log(tree.levels[1][0].layout.left);
+  console.log('END');
 })();

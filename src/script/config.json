@@ -1,14 +1,14 @@
 {
   "origin": {
     "left": 594.50,
-    "top": 100.00
+    "top": 90.00
   },
-  "size": {
+  "template": {
     "width": 25.90,
     "height": 16.00
   },
   "spacing": {
-    "horizontal": [6.10, 9.90],
-    "vertical": [9.90, 16.00]
+    "left": 9.9,
+    "top": 25.9
   }
 }

@@ -1,9 +1,7 @@
 /**
  * Populate Family Tree (illustrator javascript es3 script)
  * ------------------------------------------------------------------------------
- *
- * Description: Populate the `body` active document layer with the family tree
- * data and template.
+ * Description: Render a family tree into the illustrator active document.
  * Author: Rodolphe BARBANNEAU (rodolpher.barbanneau@gmail.com)
  *
  * ------------------------------------------------------------------------------
@@ -29,35 +27,15 @@
  * SOFTWARE.
  */
 
+
 /**
  * Parameters.
  */
 const params = {
-  // template origin (millimeters)
-  origin: {
-    left: 594.50,
-    top: 90.00,
-  },
-  // template size (millimeters)
-  size: {
-    width: 25.90,
-    height: 16.00,
-  },
-  // template spacing (millimeters)
-  spacing: {
-    horizontal: [6.10, 9.90],
-    vertical: [9.90, 16.00],
-  },
+  // golden ratio
+  phi: 1 / 1.61803398874989,
 };
 
-/**
- * Nullify a value.
- * @param value - The value.
- * @returns The nullified value.
- */
-function nullify(value) {
-  return value === '' ? null : value;
-}
 
 /**
  * Get a folder path.
@@ -67,697 +45,754 @@ function getFolder() {
   return Folder.selectDialog('Please select the output folder:', Folder('~'));
 }
 
+
 /**
- * Create a node from a data record.
- * @param record - The input data record.
- * @returns The created node.
+ * A tree node.
+ * @param {string[]} record The input data record.
+ * @returns The created tree node.
  */
-function getNode(record) {
-  /** Initialize node. */
-  const node = {};
+function Node(record) {
+  /** Initialize node fields. */
+  // node group
+  this.group = null;
+  // parent node
+  this.parent = null;
+  // children node
+  this.children = [];
 
-  /** Initialize node data fields. */
-  node.id = record ? nullify(record[1]) : null;
-  node.lineage = record ? nullify(record[2]) === 'true' : null;
-  node.firstName = record ? nullify(record[3]) : null;
-  node.lastName = record ? nullify(record[4]) : null;
-  node.sex = record ? nullify(record[5]) : null;
-  node.birth = record ? nullify(record[6]) : null;
-  node.death = record ? nullify(record[7]) : null;
-  node.wedding = record ? nullify(record[8]) : null;
-  node.parentId = record ? nullify(record[9]) : null;
+  /** Initialize node record fields. */
+  // node id
+  this.id = null;
+  // lineage flag
+  this.lineage = true;
+  // first name
+  this.firstName = null;
+  // last name
+  this.lastName = null;
+  // sex
+  this.sex = null;
+  // birth year
+  this.birth = null;
+  // death year
+  this.death = null;
+  // wedding year
+  this.wedding = null;
+  // node parent id (ancestor if parent is lineage else spouse)
+  this.parentId = null;
 
-  /** Initialize node tree fields. */
-  node.level = 0;
-  node.index = null;
-  node.ancestor = null;
-  node.parent = null;
-  node.elements = [];
-  node.spouses = [];
-  node.children = [];
+  /** Initialize node layout fields. */
+  this.layout = (function (self) {
+    return {
+      // left coordinates
+      left: function () {
+        if (self.group) {
+          // compute node index
+          var nodeIndex = 0;
+          const nodes = self.group.nodes();
+          while (
+            nodeIndex < nodes.length - 1
+            && nodes[nodeIndex] !== self
+          ) { nodeIndex += 1 }
+          return self.group.layout.left
+            + (nodeIndex * params.template.width);
+        }
+        return 0;
+      },
+      // top coordinates
+      top: function () {
+        if (self.group) {
+          return self.group.layout.top;
+        }
+        return 0;
+      },
+    };
+  })(this);
 
-  /** Initialize node layout field. */
-  node.layout = {
-    size: 0,
-    width: 0,
-    margins: [0, 0],
-    group: params.origin.left - params.size.width,
-    left: params.origin.left - params.size.width,
-    top: params.origin.top - params.size.height,
-  };
-
-  /** Return node. */
-  return node;
+  /** Build tree. */
+  this.initialize(record);
 }
 
 /**
- * Create a tree from data.
- * @param data - The input data.
- * @returns The created tree.
+ * Initialize node.
+ * @param {string[]} record The input data record.
  */
-function getTree(data) {
-  /** Initialize tree. */
-  const tree = {};
+Node.prototype.initialize = function (record) {
+  /**
+   * Nullify a value.
+   * @param {*} value The value.
+   * @returns The nullified value.
+   */
+  function nullify(value) {
+    return value === '' ? null : value;
+  }
 
-  /** Initialize tree nodes. */
-  tree.nodes = (function() {
-    // initialize nodes
-    const nodes = [];
-    // create root node
-    nodes.push(getNode());
-    nodes[0].parent = nodes[0];
-    nodes[0].spouses = [nodes[0]];
-    nodes[0].layout.width = 2 * params.size.width
-    // populate nodes from data records
-    for (var i = 1; i < data.length; i += 1) {
-      // filter void
-      if (data[i]) {
-        var record = data[i].split(',');
-        // filter check
-        if (record[0] === '1') {
-          nodes.push(getNode(record));
-        }
-      }
+  // update record fields
+  if (record) {
+    this.id = record[1];
+    this.lineage = nullify(record[2]) === 'true';
+    this.firstName = nullify(record[3]);
+    this.lastName = nullify(record[4]);
+    this.sex = nullify(record[5]);
+    this.birth = nullify(record[6]);
+    this.death = nullify(record[7]);
+    this.wedding = nullify(record[8]);
+    this.parentId = nullify(record[9]);
+  }
+};
+
+/**
+ * Add a child to the node.
+ * @param {Node} child The child.
+ */
+Node.prototype.addChild = function (child) {
+  // update child
+  child.parent = this;
+  // compute child index
+  var nodeIndex = 0;
+  // check lineage
+  while (
+    nodeIndex < this.children.length
+    && child.lineage < this.children[nodeIndex].lineage
+  ) { nodeIndex += 1 }
+  // check id
+  while (
+    nodeIndex < this.children.length
+    && child.lineage === this.children[nodeIndex].lineage
+    && child.id > this.children[nodeIndex].id
+  ) { nodeIndex += 1 }
+  // push child
+  this.children.splice(nodeIndex, 0, child);
+};
+
+
+/**
+ * A tree node group.
+ * @param {Node} node The lineage node.
+ */
+function NodeGroup(node) {
+  /** Initialize node group fields. */
+  // parent node group
+  this.parent = null;
+  // children node group
+  this.children = [];
+  // lineage node
+  this.lineage = null;
+  // spouse nodes
+  this.spouses = [];
+  // nodes (lineage and spouses)
+  this.nodes = function () {
+    // check sex
+    if (this.lineage.sex === 'male') {
+      return [this.lineage].concat(this.spouses);
     }
-
-    // process nodes parent dependencies
-    function process(index) {
-      for (var i = 1; i < nodes.length; i += 1) {
-        // check node dependency
-        if (nodes[i].parentId === nodes[index].id) {
-          // check lineage
-          if (nodes[i].lineage) {
-            // update child node
-            nodes[i].parent = nodes[index];
-            nodes[i].level = nodes[index].level + 1;
-            // update parent node
-            nodes[index].children.push(nodes[i]);
-            if (nodes[index].parent !== nodes[index]) {
-              nodes[index].parent.children.push(nodes[i]);
-            }
-          } else {
-            // update child node
-            nodes[i].parent = nodes[index];
-            nodes[i].level = nodes[index].level;
-            // update parent node
-            nodes[index].spouses.push(nodes[i]);
-          }
-          // recurse
-          process(i);
-        }
-      }
-    } process(0);
-
-    // process nodes ancestor dependencies
-    for (var i = 0; i < nodes.length; i += 1) {
-      if (nodes[i].lineage) {
-        nodes[i].ancestor = nodes[i].parent.parent;
-      } else {
-        nodes[i].ancestor = nodes[i].parent.parent.parent;
-      }
-    }
-
-    // sort and index nodes dependencies
-    for (var i = 0; i < nodes.length; i += 1) {
-      // sort spouses
-      nodes[i].spouses.sort(function (a, b) {
-        if (a.id < b.id) return -1;
-        return 1;
-      });
-      // index spouses
-      for (var k = 0; k < nodes[i].spouses.length; k += 1) {
-        nodes[i].spouses[k].index = k;
-      }
-      // sort children
-      nodes[i].children.sort(function (a, b) {
-        if (a.parent.id < b.parent.id) return -1;
-        if (a.id < b.id) return -1;
-        return 1;
-      });
-      // update elements
-      if (nodes[i].sex === 'male') {
-        nodes[i].elements = [nodes[i]].concat(nodes[i].spouses);
-      } else {
-        nodes[i].elements = nodes[i].spouses.concat([nodes[i]]);
-      }
-    }
-
-    // return nodes
-    return nodes;
-  })();
-
-  /** Initialize tree levels. */
-  tree.levels = (function() {
-    // initialize levels
-    const levels = [];
-    // populate levels
-    var level = [tree.nodes[0]], index = 0;
-    while (level.length > 0) {
-      // sort level
-      level.sort(function (a, b) {
-        if (a.ancestor.index < b.ancestor.index) return -1;
-        if (a.parent.index < b.parent.index) return -1;
-        if (a.id < b.id) return -1;
-        return 1;
-      });
-      // index level
-      for (var i = 0; i < level.length; i += 1) {
-        level[i].index = i;
-      }
-      // push level
-      levels.push(level);
-      // fetch level
-      level = [];
-      index += 1;
-      for (var i = 0; i < tree.nodes.length; i += 1) {
-        if (tree.nodes[i].lineage
-          && tree.nodes[i].level === index) {
-            level.push(tree.nodes[i]);
-        }
-      }
-    }
-
-    // process levels nodes layout margins and size
-    for (var l = levels.length - 1; l > 0; l -= 1) {
-      for (var i = 0; i < levels[l].length; i += 1) {
-        // update width
-        levels[l][i].layout.width = levels[l][i].elements.length * params.size.width;
-        // update margin
-        levels[l][i].layout.margins = [
-          0.5 * params.spacing.horizontal[
-            (i > 0 && levels[l][i].ancestor === levels[l][i - 1].ancestor) ? 0 : 1
-          ],
-          0.5 * params.spacing.horizontal[
-            (i < levels[l].length - 1 && levels[l][i].ancestor === levels[l][i + 1].ancestor) ? 0 : 1
-          ],
-        ];
-        // update size
-        for (var k = 0; k < levels[l][i].spouses.length; k += 1) {
-          if (levels[l][i].spouses[k].layout.size === 0) {
-            levels[l][i].spouses[k].layout.size = params.size.width;
-          }
-          levels[l][i].layout.size += levels[l][i].spouses[k].layout.size;
-        }
-        // check size
-        levels[l][i].layout.size = Math.max(
-          levels[l][i].layout.width,
-          levels[l][i].layout.size,
-        )
-        // cumulate size and margins
-        levels[l][i].parent.layout.size += levels[l][i].layout.size
-          + levels[l][i].layout.margins[0]
-          + levels[l][i].layout.margins[1];
-      }
-    }
-
-    // process levels nodes layout coordinates
-    for (var l = 1; l < levels.length; l += 1) {
-      var padding, offset;
-      for (var i = 0; i < levels[l].length; i += 1) {
-        // initialize offset
-        if (i === 0 || levels[l][i - 1].ancestor !== levels[l][i].ancestor) {
-          offset = levels[l][i].ancestor.layout.left
-            - (0.5 * levels[l][i].ancestor.layout.size)
-            + (0.5 * levels[l][i].ancestor.layout.width);
-        }
-        // initialize padding
-        padding = (0.5 * levels[l][i].layout.size)
-          - (0.5 * levels[l][i].layout.width);
-        // increment start offset
-        offset += levels[l][i].layout.margins[0] + padding;
-        // process elements
-        var group = offset
-        for (k = 0; k < levels[l][i].elements.length; k += 1) {
-          levels[l][i].elements[k].layout.group = group;
-          levels[l][i].elements[k].layout.left = offset;
-          levels[l][i].elements[k].layout.top = levels[l][i].ancestor.layout.top
-            + params.size.height
-            + params.spacing.vertical[0]
-            + params.spacing.vertical[1];
-          // increment offset
-          offset += params.size.width;
-        }
-        // increment end offset
-        offset += levels[l][i].layout.margins[1] + padding;
-      }
-    }
-
-    // return levels
-    return levels;
-  })();
-
-  /** Compress tree. */
-  tree.compress = function compress() {
-    function distance(a, b) {
-      if (a.layout.group < b.layout.group) {
-        return b.layout.group
-          - (a.layout.group + (a.layout.width));
-      } else {
-        return a.layout.group
-          - (b.layout.group + (b.layout.width));
-      }
-    }
-
-    function distanceFromOrigin(node) {
-      if (node.layout.group < params.origin.left) {
-        return params.origin.left
-          - node.layout.group;
-      } else {
-        return node.layout.group
-          + (node.layout.width)
-          - params.origin.left;
-      }
-    }
-
-    function constraint(node, way) {
-      // check ancestor
-        // 0 : if first node.layout.group >= ancestor.layout.group
-        // 1 : if last node.layout.group <= ancestor.layout.group
-                                        // + (ancestor.layout.width)
-                                        // - (node.layout.width)
-      // check children
-        // 0 : node.layout.group >= node.children[0].layout.group
-        // 1 : node.layout.group <= node.children[last].layout.group
-                                // + (node.children[last].layout.width)
-                                // - (node.layout.width)
-      var ancestor = null;
-      if (
-        node === node.ancestor.children[0]
-        || node === node.ancestor.children[node.ancestor.children.length - 1]
-      ) {
-        if (way === 1) {
-          ancestor = node.ancestor.layout.group;
-        } else {
-          ancestor = node.ancestor.layout.group
-            + (node.ancestor.layout.width - node.layout.width);
-        }
-      }
-      var ancestors = [null, null];
-      if (ancestor) {
-        if (ancestor < node.layout.group) {
-          ancestors[0] = ancestor;
-        } else if (ancestor > node.layout.group) {
-          ancestors[1] = ancestor;
-        } else {
-          if (way === 1) {
-            ancestors[1] = ancestor;
-          } else {
-            ancestors[0] = ancestor;
-          }
-        }
-      }
-
-      var children = [null, null];
-      if (node.children.length > 0) {
-        children = [
-          node.children[0].layout.group,
-          node.children[node.children.length - 1].layout.group
-            + (node.children[node.children.length - 1].layout.width)
-            - (node.layout.width)
-        ];
-      }
-
-      var result = [null, null];
-      if (ancestors[0] !== null && children[0] !== null) {
-        result[0] = node.layout.group - Math.max(ancestors[0], children[0]);
-      } else if (ancestors[0] !== null) {
-        result[0] = node.layout.group - ancestors[0];
-      } else if (children[0] !== null) {
-        result[0] = node.layout.group - children[0];
-      }
-      if (ancestors[1] !== null && children[1] !== null) {
-        result[1] = Math.min(ancestors[1], children[1]) - node.layout.group;
-      } else if (ancestors[1] !== null) {
-        result[1] = ancestors[1] - node.layout.group;
-      } else if (children[1] !== null) {
-        result[1] = children[1] - node.layout.group;
-      }
-
-      if (way === 1) {
-        return (result[1] !== null ? (Math.round(result[1] * 100) / 100) : null);
-      } else {
-        return (result[0] !== null ? (Math.round(result[0] * 100) / 100) : null);
-      }
-
-    }
-
-    function space(a, b) {
-      if (a.layout.group < b.layout.group) {
-        return distance(a, b) - (a.layout.margins[1] + b.layout.margins[0]);
-      } else {
-        return distance(a, b) - (a.layout.margins[0] + b.layout.margins[1]);
-      }
-    }
-
-
-    function gap(a, b) { // from a to b (a moving)
-
-      var way;
-      if (a.layout.group < b.layout.group) {
-        way = 1;
-      } else {
-        way = -1;
-      }
-
-      const spaceA = space(a, b);
-      const constraintA = constraint(a, way);
-
-      var test;
-      if (constraintA !== null) {
-        test = Math.min(spaceA, constraintA);
-      } else {
-        test = spaceA;
-      }
-      return Math.round(test * 100) / 100; //todo Math.abs()
-    }
-
-    function size(level) {
-      var first = level[0];
-      var last = level[level.length - 1];
-      return (last.elements[last.elements.length - 1].layout.group
-        + last.elements[last.elements.length - 1].layout.width)
-        - first.elements[0].layout.group;
-    }
-
-    // update node size
-    //for (var l = 1; l < tree.levels.length; l += 1) {
-    //  for (var i = 0; i < tree.levels[l].length; i += 1) {
-    //    tree.levels[l][i].layout.size = tree.levels[l][i].layout.width;
-    //  }
-    //}
-
-    //var check = 1;
-    //if (check === 1) {
-    //  alert(improvement)
-    //  alert(leftImprovement)
-    //  alert(rightImprovement)
-    //  check++;
-    //}
-
-    var total;
-    do {
-      total = 0;
-      // compute stats
-      var stats = [];
-      for (var l = 1; l < tree.levels.length; l += 1) {
-        stats.push({
-          level: tree.levels[l],
-          size: size(tree.levels[l]),
-        });
-      }
-      // sort stats
-      stats.sort(function (a, b) {
-        if (a.size < b.size) return 1;
-        return -1;
-      });
-
-      //
-      for (var l = 0; l < stats.length; l += 1) {
-        var level = stats[l].level;
-        var leftIndex = 0;
-        var rightIndex = level.length - 1;
-        var improvement = 0;
-        do {
-          if (improvement > 0) {
-            total += improvement;
-            //todo handle increment constraint
-            //for (var i = 0; i <= leftIndex; i += 1) {
-            //  for (var j = 0; j < level[i].elements.length; j += 1) {
-            //    level[i].elements[j].layout.group += improvement;
-            //    level[i].elements[j].layout.left += improvement;
-            //  }
-            //}
-            //for (var i = rightIndex; i < level.length; i += 1) {
-            //  for (var j = 0; j < level[i].elements.length; j += 1) {
-            //    level[i].elements[j].layout.group -= improvement;
-            //    level[i].elements[j].layout.left -= improvement;
-            //  }
-            //}
-            for (var j = 0; j < level[leftIndex].elements.length; j += 1) {
-              level[leftIndex].elements[j].layout.group += improvement;
-              level[leftIndex].elements[j].layout.left += improvement;
-            }
-            for (var j = 0; j < level[rightIndex].elements.length; j += 1) {
-              level[rightIndex].elements[j].layout.group -= improvement;
-              level[rightIndex].elements[j].layout.left -= improvement;
-            }
-            improvement = 0;
-          }
-          // left improvement
-          var leftImprovement = 0
-          for (var k = leftIndex; k < rightIndex; k += 1) {
-
-            //ok ancestor left
-            // find first gap
-            // find last/first constraint
-            // return min constraint
-
-
-            var test = gap(level[k], level[k + 1]);
-            if (test > 0) {
-
-              leftIndex = k;
-              leftImprovement = gap(level[k], level[k + 1]);
-              break;
-            }
-          }
-          // right improvement
-          var rightImprovement = 0
-          for (var k = rightIndex; k > leftIndex; k -= 1) {
-            if (gap(level[k], level[k - 1]) > 0) {
-              rightIndex = k;
-              rightImprovement = gap(level[k], level[k - 1]);
-              break;
-            }
-          }
-
-          improvement = Math.min(leftImprovement, rightImprovement);
-          if (leftIndex === rightIndex - 1) {
-            improvement = 0.5 * improvement;
-          }
-          improvement = (Math.round(improvement * 100) / 100);
-        } while (improvement > 0)
-        // loop from left to origin
-        // get first improvement size
-
-        // loop from right to origin
-        // get first improvement size
-
-        // left apply min and loop back change to outer left
-        // right apply min and loop back change to outer right
-
-        // last improvement split by 2 to align on origin
-      }
-    } while (total > 0)
-
-    // loop symetrical
-    // width
-    // margins [,]
-
-    // for (var l = 1; l < tree.levels.length; l += 1) {
-    //   for (var i = 0; i < tree.levels[l].length; i += 1) {
-    //   }
-    // }
-
-    // return
-    return this;
+    return this.spouses.concat([this.lineage]);
   };
+
+  /** Initialize node group layout fields. */
+  this.layout = {
+    // size (children)
+    size: 0,
+    // width
+    width: 0,
+    // margins
+    margins: [0, 0],
+    // left coordinates
+    left: 0,
+    // top coordinates
+    top: 0,
+  };
+
+  /** Build node group. */
+  this.initialize(node);
+}
+
+/**
+ * Initialize node group.
+ * @param {Node} node The lineage node.
+ */
+NodeGroup.prototype.initialize = function (node) {
+  // check lineage
+  if (!node.lineage) throw 'Initializing node must be of lineage type';
+  // update node
+  node.group = this;
+  // update node group
+  this.lineage = node;
+  // check parent
+  if (node.parent) {
+    this.parent = node.parent.group;
+    // compute node group index
+    var groupIndex = 0, nodeIndex = 0;
+    const groups = this.parent.children;
+    const nodes = this.parent.nodes();
+    // check parent lineage node
+    while (
+      groupIndex < groups.length
+      && nodes[nodeIndex] !== node.parent
+    ) {
+      while (
+        nodeIndex < nodes.length
+        && nodes[nodeIndex] !== node.parent
+        && nodes[nodeIndex] !== groups[groupIndex].lineage.parent
+      ) { nodeIndex += 1 }
+      // check node
+      if (nodes[nodeIndex] !== node.parent) groupIndex += 1;
+    }
+    // check id
+    while (
+      groupIndex < groups.length
+      && node.parent === groups[groupIndex].lineage.parent
+      && node.id > groups[groupIndex].lineage.id
+    ) { groupIndex += 1 }
+    // push node group
+    this.parent.children.splice(groupIndex, 0, this);
+  } else {
+    // root
+    this.layout.left = params.origin.left
+      - (0.5 * params.template.width);
+    this.layout.top = params.origin.top
+      - params.template.height;
+  }
+};
+
+/**
+ * Add a spouse to the node group.
+ * @param {Node} spouse The spouse.
+ */
+NodeGroup.prototype.addSpouse = function (spouse) {
+  // update spouse
+  spouse.group = this;
+  // compute spouse index
+  var nodeIndex = 0;
+  // check sex
+  while (
+    nodeIndex < this.spouses.length
+    && spouse.sex < this.spouses[nodeIndex].sex
+  ) { nodeIndex += 1 }
+  // check id
+  while (
+    nodeIndex < this.spouses.length
+    && spouse.sex === this.spouses[nodeIndex].sex
+    && spouse.id > this.spouses[nodeIndex].id
+  ) { nodeIndex += 1 }
+  // push spouse
+  this.spouses.splice(nodeIndex, 0, spouse);
+};
+
+
+/**
+ * A tree.
+ * @param {string[]} data The input data.
+ */
+function Tree(data) {
+  /** Initialize tree. */
+  // nodes
+  this.nodes = [];
+  // node groups
+  this.groups = [];
+  // levels
+  this.levels = [];
+
+  /** Build tree. */
+  this.initialize(data);
+}
+
+/**
+ * Initialize tree.
+ * @param {string[]} data The input data.
+ */
+Tree.prototype.initialize = function (data) {
+  // create root node and group
+  this.nodes.push(new Node());
+  this.groups.push(new NodeGroup(this.nodes[0]));
+
+  // create nodes from data records
+  for (var i = 1; i < data.length; i += 1) {
+    // filter empty record
+    if (data[i]) {
+      var record = data[i].split(',');
+      // filter checked record
+      if (record[0] === '1') {
+        // push node
+        this.nodes.push(new Node(record));
+      }
+    }
+  }
+
+  // sort nodes
+  this.nodes.sort(function (a, b) {
+    if (a.lineage > b.lineage) return -1;
+    if (a.parentId < b.parentId) return -1;
+    if (a.id < b.id) return -1;
+    return 1;
+  });
+
+  // create node groups and process dependencies
+  function process(self, nodeIndex) {
+    for (var i = 1; i < self.nodes.length; i += 1) {
+      // check node dependency
+      if (self.nodes[i].parentId === self.nodes[nodeIndex].id) {
+        // update node
+        self.nodes[nodeIndex].addChild(self.nodes[i]);
+        // check lineage
+        if (self.nodes[i].lineage) {
+          // create node group
+          self.groups.push(new NodeGroup(self.nodes[i]));
+        } else {
+          // update node group
+          self.nodes[i].parent.group.addSpouse(self.nodes[i]);
+        }
+        // recurse
+        process(self, i);
+      }
+    }
+  } process(this, 0);
+
+  // create levels
+  var level = [this.groups[0]], levelIndex = 0;
+  while (level.length > 0) {
+    // push level
+    this.levels.push(level);
+    // fetch level
+    level = [];
+    levelIndex += 1;
+    // process previous level node groups
+    var groups = this.levels[levelIndex - 1];
+    for (var i = 0; i < groups.length; i += 1) {
+      // process node group children
+      for (var k = 0; k < groups[i].children.length; k += 1) {
+        level.push(groups[i].children[k]);
+      }
+    }
+  }
+
+  // process levels layout size and margins
+  for (var l = this.levels.length - 1; l >= 0; l -= 1) {
+    var groups = this.levels[l];
+    for (var i = 0; i < groups.length; i += 1) {
+      var nodes = groups[i].nodes();
+      // update width
+      groups[i].layout.width = nodes.length * params.template.width;
+      // update size
+      for (var k = 0; k < groups[i].children.length; k += 1) {
+        // size and width
+        groups[i].layout.size += Math.max(
+          groups[i].children[k].layout.size,
+          groups[i].children[k].layout.width,
+        );
+        // margins
+        groups[i].layout.size += groups[i].children[k].layout.margins[0]
+          + groups[i].children[k].layout.margins[1];
+      }
+      // update margins
+      groups[i].layout.margins = [
+        i > 0 && groups[i].parent === groups[i - 1].parent
+          ? 0.5 * params.spacing.left * params.phi
+          : 0.5 * params.spacing.left,
+        i < groups.length - 1 && groups[i].parent === groups[i + 1].parent
+          ? 0.5 * params.spacing.left * params.phi
+          : 0.5 * params.spacing.left,
+      ];
+    }
+  }
+
+  // process levels layout coordinates
+  for (var l = 1; l < this.levels.length; l += 1) {
+    var groups = this.levels[l];
+    var offset, padding;
+    for (var i = 0; i < groups.length; i += 1) {
+      // initialize offset
+      if (i === 0 || groups[i - 1].parent !== groups[i].parent) {
+        offset = groups[i].parent.layout.left
+          - (0.5 * groups[i].parent.layout.size)
+          + (0.5 * groups[i].parent.layout.width);
+      }
+      // initialize padding
+      padding = Math.max(0, 0.5 * (groups[i].layout.size - groups[i].layout.width));
+      // increment start offset
+      offset += groups[i].layout.margins[0] + padding;
+      // update coordinates
+      groups[i].layout.left = offset;
+      groups[i].layout.top = groups[i].parent.layout.top
+        + params.template.height
+        + params.spacing.top;
+      // increment offset
+      offset += groups[i].layout.width;
+      // increment end offset
+      offset += groups[i].layout.margins[1] + padding;
+    }
+  }
+};
+
+/**
+ * Compress tree.
+ */
+Tree.prototype.compress = function () {
+  /**
+   * Compute the objective function between two node groups (a to b).
+   * @param {NodeGroup} a The anchor node group.
+   * @param {NodeGroup} b The target node group.
+   * @returns
+   */
+  function objective(a, b) {
+    // initialize
+    const way = a.layout.left < b.layout.left ? 1 : 0;
+    // compute constraint
+    var constraint = Number.MAX_VALUE;
+
+
+    //todo: freedom parameter
+    const parentFreedom = Math.max(
+      params.template.width,
+      a.parent.layout.width
+        - a.parent.layout.size
+        + a.parent.children[0].layout.margins[0]
+        + a.parent.children[a.parent.children.length - 1].layout.margins[0],
+    );
+    const childrenFreedom = a.children.length === 0 ? 0 : Math.max(
+      params.template.width,
+      -a.layout.width
+        - a.layout.size
+        + a.children[0].layout.margins[0]
+        + a.children[a.children.length - 1].layout.margins[0],
+    );
+
+
+    // parent
+    if (way && a === a.parent.children[0]) {
+      constraint = Math.min(
+        constraint,
+        a.parent.layout.left
+          - a.layout.left
+          + parentFreedom,
+      );
+    } else if (!way && a === a.parent.children[a.parent.children.length - 1]) {
+      constraint = Math.min(
+        constraint,
+        a.layout.left
+          + a.layout.width
+          - a.parent.layout.left
+          - a.parent.layout.width
+          + parentFreedom,
+      );
+    }
+    // children
+    if (a.children.length > 0) {
+      if (way) {
+        constraint = Math.min(
+          constraint,
+          a.children[a.children.length - 1].layout.left
+            + a.children[a.children.length - 1].layout.width
+            - a.layout.left
+            - a.layout.width
+            + childrenFreedom,
+        );
+      } else {
+        constraint = Math.min(
+          constraint,
+          a.layout.left
+            - a.children[0].layout.left
+            + childrenFreedom,
+        );
+      }
+    }
+    // compute distance
+    var distance = 0;
+    if (way) {
+      distance = Math.max(
+        distance,
+        b.layout.left
+          - b.layout.margins[0]
+          - a.layout.left
+          - a.layout.width
+          - a.layout.margins[1],
+      );
+    } else {
+      distance = Math.max(
+        distance,
+        a.layout.left
+          - a.layout.margins[0]
+          - b.layout.left
+          - b.layout.width
+          - b.layout.margins[1],
+      );
+    }
+    // return round
+    return 0.01 * Math.round(
+      100 * Math.max(0, Math.min(constraint, distance)),
+    );
+  }
+
+  // compress
+  var gain = {};
+  do {
+    // initialize
+    gain.total = 0;
+    // compute stats
+    var stats = [];
+    for (var l = 1; l < this.levels.length; l += 1) {
+      var level = this.levels[l];
+      stats.push({
+        level: level,
+        size: level[level.length - 1].layout.left
+          + level[level.length - 1].layout.width
+          - level[0].layout.left,
+      });
+    }
+    // sort stats
+    stats.sort(function (a, b) {
+      if (a.size > b.size) return -1;
+      return 1;
+    });
+    // process stats
+    for (var s = 0; s < stats.length; s += 1) {
+      // initialize
+      gain.level = 0;
+      var level = stats[s].level;
+      var leftIndex = 0;
+      var rightIndex = level.length - 1;
+      // compress
+      do {
+        // check level gain
+        if (gain.level > 0) {
+          gain.total += gain.level;
+          level[leftIndex].layout.left += gain.level;
+          level[rightIndex].layout.left -= gain.level;
+          gain.level = 0;
+        }
+        // compute left gain
+        gain.left = 0;
+        for (var l = leftIndex; l < rightIndex; l += 1) {
+          //todo: find first gap
+          //todo: find last/first constraint
+          //todo: return min constraint
+          gain.left = objective(level[l], level[l + 1]);
+          if (gain.left > 0) {
+            leftIndex = l;
+            break;
+          }
+        }
+        // compute right gain
+        gain.right = 0
+        for (var l = rightIndex; l > leftIndex; l -= 1) {
+          //todo: find first gap
+          //todo: find last/first constraint
+          //todo: return min constraint
+          gain.right = objective(level[l], level[l - 1]);
+          if (gain.right > 0) {
+            rightIndex = l;
+            break;
+          }
+        }
+        // compute level gain
+        gain.level = Math.min(gain.left, gain.right);
+        if (leftIndex === rightIndex - 1) gain.level *= 0.5
+        gain.level = 0.01 * Math.round(100 * gain.level);
+      } while (gain.level > 0)
+    }
+  } while (gain.total > 0)
+};
+
+/**
+ * Render the tree in the active document.
+ */
+Tree.prototype.render = function () {
+  /**
+   * Initialize a progress window.
+   * @param {number} steps The total number of steps.
+   */
+  function progress(steps) {
+    // initialize
+    const win = new Window(
+      'palette',
+      'Populating family tree...',
+      undefined,
+      { closeButton: false },
+    );
+    const tab = win.add('statictext');
+    tab.preferredSize = [450, -1];
+    const bar = win.add('progressbar', undefined, 0, steps);
+    bar.preferredSize = [450, -1];
+    // methods
+    progress.close = function () { win.close(); };
+    progress.increment = function () { bar.value += 1; return bar.value; };
+    progress.message = function (message) { tab.text = message; win.update(); win.show(); };
+    // show
+    win.show();
+  }
 
   /**
-   * Render the tree in the active document.
-   * @param app - The application.
-   * @returns The tree.
+   * Process a tree node group drawing.
+   * @param {*} context The context.
+   * @param {NodeGroup} group The tree node group to process.
    */
-  tree.render = function render(app) {
-    /**
-     * Initialize a progress window.
-     * @param steps - The total number of steps.
-     */
-    function progress(steps) {
-      // initialize
-      const win = new Window('palette', 'Populating family tree...', undefined, {closeButton: false});
-      const tab = win.add('statictext');
-      tab.preferredSize = [450, -1];
-      const bar = win.add('progressbar', undefined, 0, steps);
-      bar.preferredSize = [450, -1];
-      // methods
-      progress.close = function () { win.close(); };
-      progress.increment = function () { bar.value += 1; return bar.value; };
-      progress.message = function (message) { tab.text = message; win.update(); win.show(); };
-      // show
-      win.show();
+  function process(context, group) {
+    // coalesce value
+    function coalesce(value, other) {
+      return value ? value : other;
     }
 
-    /**
-     * Process a tree node drawing.
-     * @param layer - The output layer.
-     * @param template - The template.
-     * @param node - The tree node to process.
-     */
-    function process(layer, template, node) {
-      // coalesce value
-      function coalesce(value, other) {
-        return value ? value : other;
+    // duplicate template item
+    function duplicate(target, item) {
+      return item.duplicate(target, ElementPlacement.PLACEATBEGINNING);
+    }
+
+    // convert measure from millimeters to points
+    function mmToPoints(measure) {
+      const points = 2.83464566929134;
+      return measure * points;
+    }
+
+    // initialize nodes
+    const nodes = group.nodes();
+    // initialize links ratio
+    var ratios = [];
+    for (var i = 0; i < nodes.length; i += 1) {
+      // push ratio
+      if (i === 0) {
+        ratios.push(1);
+      } else {
+        ratios.push(ratios[i - 1]);
       }
-
-      // duplicate template item
-      function duplicate(target, item) {
-        return item.duplicate(target, ElementPlacement.PLACEATBEGINNING);
-      }
-
-      // convert measure from millimeters to points
-      function mmToPoints(measure) {
-        const points = 2.83464566929134;
-        return measure * points;
-      }
-
-      // process node elements
-      for (var i = node.elements.length - 1; i >= 0; i -= 1) {
-        var output, vector;
-        // initialize output
-        if (node.elements[i].id || i === 0) {
-          output = layer.groupItems.add();
-          output.name = coalesce(node.elements[i].id, 'root');
-        }
-        // draw body
-        if (output && node.elements[i].id) {
-          // draw info template
-          if (node.elements[i].wedding) {
-            vector = duplicate(output, template.info);
-            vector.textFrames.getByName('wedding').contents = coalesce(node.elements[i].wedding, '');
-            vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
-            vector.top = coalesce(-mmToPoints(node.elements[i].layout.top - params.spacing.vertical[0]), 0);
-          }
-          // draw node template
-          vector = duplicate(output, template.node);
-          vector.textFrames.getByName('first-name').contents = coalesce(node.elements[i].firstName, '');
-          vector.textFrames.getByName('last-name').contents = coalesce(node.elements[i].lastName, '');
-          vector.textFrames.getByName('birth').contents = coalesce(node.elements[i].birth, '');
-          vector.textFrames.getByName('death').contents = coalesce(node.elements[i].death, '');
-          vector.left = coalesce(mmToPoints(node.elements[i].layout.left), 0);
-          vector.top = coalesce(-mmToPoints(node.elements[i].layout.top), 0);
-        }
-        // draw links
-        if (output && !node.elements[i].lineage) {
-          // initialize output
-          output.groupItems.add();
-          output.groupItems[0].name = 'links';
-          // draw link template
-          for (var j = node.elements[i].children.length - 1; j >= 0; j -= 1) {
-            // initialize draw
-            vector = duplicate(output.groupItems.getByName('links'), template.link);
-            vector.name = coalesce(node.elements[i].children[j].id, '<Undefined>');
-            // initialize coordinates
-            var coords = {};
-            coords.start = {
-              left: coalesce(mmToPoints(node.elements[i].layout.left + (params.size.width * (node.elements[i].id ? 0.5 : 1))), 0),
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height), 0),
-            };
-            coords.break = {
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[1]), 0),
-            };
-            coords.end = {
-              left: coalesce(mmToPoints(node.elements[i].children[j].layout.left + (0.5 * params.size.width)), 0),
-              top: coalesce(-mmToPoints(node.elements[i].layout.top + params.size.height + params.spacing.vertical[0] + params.spacing.vertical[1]), 0),
-            };
-            // initialize item
-            var item;
-            // edit start item
-            item = vector.pathItems.getByName('start');
-            if (item) {
-              item.left = coords.start.left - (0.5 * item.width);
-              item.top = coords.start.top;
-            }
-            // edit line item
-            item = vector.pathItems.getByName('line');
-            if (item) {
-              if (item.pathPoints.length === 4) {
-                item.pathPoints[0].anchor = [coords.start.left, coords.start.top];
-                item.pathPoints[0].leftDirection = [coords.start.left, coords.start.top];
-                item.pathPoints[0].rightDirection = [coords.start.left, coords.start.top];
-
-                item.pathPoints[1].anchor = [coords.start.left, coords.break.top];
-                item.pathPoints[1].leftDirection = [coords.start.left, coords.break.top];
-                item.pathPoints[1].rightDirection = [coords.start.left, coords.break.top];
-
-                item.pathPoints[2].anchor = [coords.end.left, coords.break.top];
-                item.pathPoints[2].leftDirection = [coords.end.left, coords.break.top];
-                item.pathPoints[2].rightDirection = [coords.end.left, coords.break.top];
-
-                item.pathPoints[3].anchor = [coords.end.left, coords.end.top];
-                item.pathPoints[3].leftDirection = [coords.end.left, coords.end.top];
-                item.pathPoints[3].rightDirection = [coords.end.left, coords.end.top];
-              } else {
-                item.remove();
-              }
-            }
-            // edit end item
-            item = vector.pathItems.getByName('end');
-            if (item) {
-              item.left = coords.end.left - (0.5 * item.width);
-              item.top = coords.end.top + item.height;
-            }
-          }
+      // check children lineage
+      for (var k = 0; k < nodes[i].children.length; k += 1) {
+        if (nodes[i].children[k].lineage) {
+          ratios[i] *= params.phi;
+          break;
         }
       }
     }
 
-    /** Render. */
-
-    // initialize application context
-    const doc = app.activeDocument;
-    doc.artboards.setActiveArtboardIndex(0);
-    const layer = doc.layers.add();
-    layer.name = 'tree';
-    const template = doc
-      .layers.getByName('template')
-      .layers.getByName('items')
-      .groupItems;
-
-    // initialize progress steps
-    var steps = 0;
-    for (var l = 1; l < tree.levels.length; l += 1) {
-      steps += tree.levels[l].length;
+    // process group nodes
+    for (var i = nodes.length - 1; i >= 0; i -= 1) {
+      var draw = {}, vector, item;
+      // initialize output
+      draw.output = context.layer.groupItems.add();
+      draw.output.name = coalesce(nodes[i].id, 'root');
+      draw.links = draw.output.groupItems.add();
+      draw.links.name = 'links';
+      // draw body
+      if (nodes[i].id) {
+        // draw node template
+        vector = duplicate(draw.output, context.template.groupItems.node);
+        vector.textFrames.getByName('first-name').contents = coalesce(nodes[i].firstName, '');
+        vector.textFrames.getByName('last-name').contents = coalesce(nodes[i].lastName, '');
+        vector.textFrames.getByName('birth').contents = coalesce(nodes[i].birth, '');
+        vector.textFrames.getByName('death').contents = coalesce(nodes[i].death, '');
+        vector.left = mmToPoints(nodes[i].layout.left());
+        vector.top = -mmToPoints(nodes[i].layout.top());
+        // draw info template
+        if (nodes[i].wedding) {
+          vector = duplicate(draw.output, context.template.groupItems.info);
+          vector.textFrames.getByName('wedding').contents = coalesce(nodes[i].wedding, '');
+          vector.left = mmToPoints(nodes[i].layout.left());
+          vector.top = -mmToPoints(nodes[i].layout.top() - (params.spacing.top * Math.pow(params.phi, 2)));
+        }
+      }
+      // draw links
+      for (var k = nodes[i].children.length - 1; k >= 0; k -= 1) {
+        if (nodes[i].children[k].lineage) {
+          // initialize vector
+          vector = duplicate(draw.links, context.template.groupItems.link);
+          vector.name = coalesce(nodes[i].children[k].id, '<Undefined>');
+          // initialize coordinates
+          var coords = {
+            start: {
+              left: mmToPoints(nodes[i].layout.left() + (0.5 * params.template.width)),
+              top: -mmToPoints(nodes[i].layout.top() + params.template.height),
+            },
+            end: {
+              left: mmToPoints(nodes[i].children[k].layout.left() + (0.5 * params.template.width)),
+              top: -mmToPoints(nodes[i].children[k].layout.top()),
+            },
+          };
+          // edit start item
+          item = vector.pathItems.getByName('start');
+          item.left = coords.start.left - (0.5 * item.width);
+          item.top = coords.start.top;
+          // edit line item
+          item = vector.pathItems.getByName('line');
+          item.setEntirePath([
+            [coords.start.left, coords.start.top],
+            [coords.start.left, coords.start.top - mmToPoints(params.spacing.top * ratios[i])],
+            [coords.end.left, coords.start.top - mmToPoints(params.spacing.top * ratios[i])],
+            [coords.end.left, coords.end.top]
+          ]);
+          // edit end item
+          item = vector.pathItems.getByName('end');
+          item.left = coords.end.left - (0.5 * item.width);
+          item.top = coords.end.top + item.height;
+        }
+      }
     }
+  }
 
+  // initialize context
+  const context = {};
+  context.doc = params.app.activeDocument;
+  context.doc.artboards.setActiveArtboardIndex(0);
+  context.layer = context.doc.layers.add();
+  context.layer.name = 'tree';
+  context.layer.hasSelectedArtwork = false;
+  context.file = params.app.open(new File(params.root + '/template.ai'));
+  context.template = context.file
+    .layers.getByName('main')
+    .groupItems.getByName('template')
+    .duplicate(context.doc, ElementPlacement.PLACEATBEGINNING);
+  context.template.locked = false;
+  context.file.close(SaveOptions.DONOTSAVECHANGES);
+  delete context.file;
+
+  // initialize progress steps
+  var steps = 0;
+  for (var l = 1; l < this.levels.length; l += 1) {
+    steps += this.levels[l].length;
+  }
+
+  // render
+  var message;
+  try {
     // process tree
     progress(steps);
-    for (var l = tree.levels.length - 1; l >= 0; l -= 1) {
-      for (var i = tree.levels[l].length - 1; i >= 0; i -= 1) {
+    for (var l = this.levels.length - 1; l >= 0; l -= 1) {
+      for (var i = this.levels[l].length - 1; i >= 0; i -= 1) {
         // process node
         progress.message('Drawing element ' + progress.increment() + '/' + steps + '...');
-        process(layer, template, tree.levels[l][i]);
+        process(context, this.levels[l][i]);
       }
     }
-    progress.close();
+  } catch (error) {
+    message = error;
+  }
 
-    // return
-    layer.hasSelectedArtwork = false;
-    return this;
-  };
+  // finalize
+  context.template.remove();
+  progress.close();
+  if (message) throw message;
+};
 
-  /** Return tree. */
-  return tree;
-}
 
 /** Script entry point. */
 (function () {
-  // initialize
-  const script = new File($.fileName);
-  const root = script.parent.fsName;
+  // initialize params application
+  params.app = app;
+  params.script = new File($.fileName);
+  params.root = params.script.parent.fsName;
 
-  // data
-  const csv = File(root + '/data/tree.csv');
+  // initialize params config
+  const json = new File(params.root + '/config.json');
+  json.open('r');
+  const config = eval('(' + json.read() + ')');
+  for (var attribute in config) { params[attribute] = config[attribute]; }
+  json.close();
+
+  // fetch data
+  const csv = new File(params.root + '/data/tree.csv');
   csv.open('r');
   const data = csv.read().split(/\r?\n/);
   csv.close();
 
-  // tree
-  const tree = getTree(data);
+  // render tree
+  const tree = new Tree(data);
   tree.compress();
-  tree.render(app);
-
-  // finalize
-  //alert(tree.levels[1][0].layout.left)
-  // alert('success');
+  tree.render();
 })();

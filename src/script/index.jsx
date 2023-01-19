@@ -83,7 +83,7 @@ function Node(record) {
   /** Initialize node layout fields. */
   this.layout = (function (self) {
     return {
-      // left coordinates
+      // left coordinate
       left: function () {
         if (self.group) {
           // compute node index
@@ -93,17 +93,25 @@ function Node(record) {
             nodeIndex < nodes.length - 1
             && nodes[nodeIndex] !== self
           ) { nodeIndex += 1 }
-          return self.group.layout.left
+          return self.group.layout.left()
             + (nodeIndex * params.template.width);
         }
         return 0;
       },
-      // top coordinates
+      // top coordinate
       top: function () {
         if (self.group) {
-          return self.group.layout.top;
+          return self.group.layout.top();
         }
         return 0;
+      },
+      // right coordinate
+      right: function () {
+        return this.left() + params.template.width;
+      },
+      // bottom coordinate
+      bottom: function () {
+        return this.top() + params.template.height;
       },
     };
   })(this);
@@ -189,18 +197,44 @@ function NodeGroup(node) {
   };
 
   /** Initialize node group layout fields. */
-  this.layout = {
-    // size (children)
-    size: 0,
-    // width
-    width: 0,
-    // margins
-    margins: [0, 0],
-    // left coordinates
-    left: 0,
-    // top coordinates
-    top: 0,
-  };
+  this.layout = (function (self) {
+    return {
+      // level
+      level: 0,
+      // index
+      index: 0,
+      // coordinates
+      coordinates: [0, 0],
+      // width (lineage and spouses)
+      width: 0,
+      // margins
+      margins: [0, 0],
+      // left coordinate
+      left: function () {
+        return this.coordinates[0];
+      },
+      // top coordinate
+      top: function () {
+        return this.coordinates[1];
+      },
+      // right coordinate
+      right: function () {
+        return this.coordinates[0] + this.width;
+      },
+      // bottom coordinate
+      bottom: function () {
+        return this.coordinates[1] + params.template.height;
+      },
+      // size (children)
+      size: function () {
+        if (self.children.length > 0) {
+          return self.children[self.children.length - 1].layout.right()
+            - self.children[0].layout.left();
+        }
+        return 0;
+      },
+    };
+  })(this);
 
   /** Build node group. */
   this.initialize(node);
@@ -245,12 +279,6 @@ NodeGroup.prototype.initialize = function (node) {
     ) { groupIndex += 1 }
     // push node group
     this.parent.children.splice(groupIndex, 0, this);
-  } else {
-    // root
-    this.layout.left = params.origin.left
-      - (0.5 * params.template.width);
-    this.layout.top = params.origin.top
-      - params.template.height;
   }
 };
 
@@ -301,6 +329,31 @@ function Tree(data) {
  * @param {string[]} data The input data.
  */
 Tree.prototype.initialize = function (data) {
+  /**
+   * Populate recursively tree node groups and process node dependencies.
+   * @param {Tree} self The tree.
+   * @param {number} nodeIndex The node index.
+   */
+  function populate(self, nodeIndex) {
+    for (var i = 1; i < self.nodes.length; i += 1) {
+      // check node dependency
+      if (self.nodes[i].parentId === self.nodes[nodeIndex].id) {
+        // update node
+        self.nodes[nodeIndex].addChild(self.nodes[i]);
+        // check lineage
+        if (self.nodes[i].lineage) {
+          // create node group
+          self.groups.push(new NodeGroup(self.nodes[i]));
+        } else {
+          // update node group
+          self.nodes[i].parent.group.addSpouse(self.nodes[i]);
+        }
+        // recurse
+        populate(self, i);
+      }
+    }
+  }
+
   // create root node and group
   this.nodes.push(new Node());
   this.groups.push(new NodeGroup(this.nodes[0]));
@@ -326,26 +379,8 @@ Tree.prototype.initialize = function (data) {
     return 1;
   });
 
-  // create node groups and process dependencies
-  function process(self, nodeIndex) {
-    for (var i = 1; i < self.nodes.length; i += 1) {
-      // check node dependency
-      if (self.nodes[i].parentId === self.nodes[nodeIndex].id) {
-        // update node
-        self.nodes[nodeIndex].addChild(self.nodes[i]);
-        // check lineage
-        if (self.nodes[i].lineage) {
-          // create node group
-          self.groups.push(new NodeGroup(self.nodes[i]));
-        } else {
-          // update node group
-          self.nodes[i].parent.group.addSpouse(self.nodes[i]);
-        }
-        // recurse
-        process(self, i);
-      }
-    }
-  } process(this, 0);
+  // populate node groups
+  populate(this, 0);
 
   // create levels
   var level = [this.groups[0]], levelIndex = 0;
@@ -357,240 +392,524 @@ Tree.prototype.initialize = function (data) {
     levelIndex += 1;
     // process previous level node groups
     var groups = this.levels[levelIndex - 1];
+    var groupIndex = 0;
     for (var i = 0; i < groups.length; i += 1) {
       // process node group children
       for (var k = 0; k < groups[i].children.length; k += 1) {
+        // update group
+        groups[i].children[k].layout.level = levelIndex;
+        groups[i].children[k].layout.index = groupIndex;
+        groupIndex += 1;
+        // push group
         level.push(groups[i].children[k]);
       }
     }
   }
 
-  // process levels layout size and margins
-  for (var l = this.levels.length - 1; l >= 0; l -= 1) {
-    var groups = this.levels[l];
-    for (var i = 0; i < groups.length; i += 1) {
-      var nodes = groups[i].nodes();
-      // update width
-      groups[i].layout.width = nodes.length * params.template.width;
-      // update size
-      for (var k = 0; k < groups[i].children.length; k += 1) {
-        // size and width
-        groups[i].layout.size += Math.max(
-          groups[i].children[k].layout.size,
-          groups[i].children[k].layout.width,
-        );
-        // margins
-        groups[i].layout.size += groups[i].children[k].layout.margins[0]
-          + groups[i].children[k].layout.margins[1];
-      }
-      // update margins
-      groups[i].layout.margins = [
-        i > 0 && groups[i].parent === groups[i - 1].parent
-          ? 0.5 * params.spacing.left * params.phi
-          : 0.5 * params.spacing.left,
-        i < groups.length - 1 && groups[i].parent === groups[i + 1].parent
-          ? 0.5 * params.spacing.left * params.phi
-          : 0.5 * params.spacing.left,
+  // process levels layout
+  for (var l = 0; l < this.levels.length - 1; l += 1) {
+    // initialize
+    if (l === 0) {
+      // width
+      this.groups[0].layout.width = params.template.width;
+      // coordinates
+      this.groups[0].layout.coordinates = [
+        params.origin.left - (0.5 * params.template.width),
+        params.origin.top - params.template.height,
       ];
     }
-  }
 
-  // process levels layout coordinates
-  for (var l = 1; l < this.levels.length; l += 1) {
+    // process node groups children layout
     var groups = this.levels[l];
-    var offset, padding;
-    for (var i = 0; i < groups.length; i += 1) {
-      // initialize offset
-      if (i === 0 || groups[i - 1].parent !== groups[i].parent) {
-        offset = groups[i].parent.layout.left
-          - (0.5 * groups[i].parent.layout.size)
-          + (0.5 * groups[i].parent.layout.width);
-      }
-      // initialize padding
-      padding = Math.max(0, 0.5 * (groups[i].layout.size - groups[i].layout.width));
-      // increment start offset
-      offset += groups[i].layout.margins[0] + padding;
-      // update coordinates
-      groups[i].layout.left = offset;
-      groups[i].layout.top = groups[i].parent.layout.top
-        + params.template.height
-        + params.spacing.top;
-      // increment offset
-      offset += groups[i].layout.width;
-      // increment end offset
-      offset += groups[i].layout.margins[1] + padding;
-    }
-  }
-};
-
-/**
- * Compress tree.
- */
-Tree.prototype.compress = function () {
-  /**
-   * Compute the objective function between two node groups (a to b).
-   * @param {NodeGroup} a The anchor node group.
-   * @param {NodeGroup} b The target node group.
-   * @returns
-   */
-  function objective(a, b) {
-    // initialize
-    const way = a.layout.left < b.layout.left ? 1 : 0;
-    // compute constraint
-    var constraint = Number.MAX_VALUE;
-
-
-    //todo: freedom parameter
-    const parentFreedom = Math.max(
-      params.template.width,
-      a.parent.layout.width
-        - a.parent.layout.size
-        + a.parent.children[0].layout.margins[0]
-        + a.parent.children[a.parent.children.length - 1].layout.margins[0],
-    );
-    const childrenFreedom = a.children.length === 0 ? 0 : Math.max(
-      params.template.width,
-      -a.layout.width
-        - a.layout.size
-        + a.children[0].layout.margins[0]
-        + a.children[a.children.length - 1].layout.margins[0],
-    );
-
-
-    // parent
-    if (way && a === a.parent.children[0]) {
-      constraint = Math.min(
-        constraint,
-        a.parent.layout.left
-          - a.layout.left
-          + parentFreedom,
-      );
-    } else if (!way && a === a.parent.children[a.parent.children.length - 1]) {
-      constraint = Math.min(
-        constraint,
-        a.layout.left
-          + a.layout.width
-          - a.parent.layout.left
-          - a.parent.layout.width
-          + parentFreedom,
-      );
-    }
-    // children
-    if (a.children.length > 0) {
-      if (way) {
-        constraint = Math.min(
-          constraint,
-          a.children[a.children.length - 1].layout.left
-            + a.children[a.children.length - 1].layout.width
-            - a.layout.left
-            - a.layout.width
-            + childrenFreedom,
-        );
-      } else {
-        constraint = Math.min(
-          constraint,
-          a.layout.left
-            - a.children[0].layout.left
-            + childrenFreedom,
-        );
-      }
-    }
-    // compute distance
-    var distance = 0;
-    if (way) {
-      distance = Math.max(
-        distance,
-        b.layout.left
-          - b.layout.margins[0]
-          - a.layout.left
-          - a.layout.width
-          - a.layout.margins[1],
-      );
-    } else {
-      distance = Math.max(
-        distance,
-        a.layout.left
-          - a.layout.margins[0]
-          - b.layout.left
-          - b.layout.width
-          - b.layout.margins[1],
-      );
-    }
-    // return round
-    return 0.01 * Math.round(
-      100 * Math.max(0, Math.min(constraint, distance)),
-    );
-  }
-
-  // compress
-  var gain = {};
-  do {
-    // initialize
-    gain.total = 0;
-    // compute stats
     var stats = [];
-    for (var l = 1; l < this.levels.length; l += 1) {
-      var level = this.levels[l];
-      stats.push({
-        level: level,
-        size: level[level.length - 1].layout.left
-          + level[level.length - 1].layout.width
-          - level[0].layout.left,
-      });
+    for (var i = 0; i < groups.length; i += 1) {
+      // inititialize stat
+      var stat = {
+        size: 0,
+        range: [0, 0],
+        initial: 0,
+        target: 0,
+      };
+      // process children layout
+      var children = groups[i].children;
+      for (var k = 0; k < children.length; k += 1) {
+        var nodes = children[k].nodes();
+        // update width
+        children[k].layout.width = nodes.length * params.template.width;
+        // update margins
+        children[k].layout.margins = [
+          k === 0
+            ? 0.5 * params.spacing.left
+            : 0.5 * params.spacing.left * params.phi,
+          k === children.length - 1
+            ? 0.5 * params.spacing.left
+            : 0.5 * params.spacing.left * params.phi,
+        ];
+        // compute size stat
+        stat.size += children[k].layout.width
+          + (k > 0 ? children[k].layout.margins[0] : 0)
+          + (k < children.length - 1 ? children[k].layout.margins[1] : 0);
+      }
+      // compute range stat
+      stat.range = [
+        groups[i].layout.left()
+          + Math.min(0, groups[i].layout.width - stat.size),
+        groups[i].layout.left()
+          + Math.max(0, groups[i].layout.width - stat.size),
+      ];
+      // compute initial stat
+      stat.initial = Math.max(
+        stat.range[0],
+        Math.min(
+          stat.range[1],
+          params.origin.left - (0.5 * stat.size),
+        ),
+      );
+      // compute target stat
+      stat.target = stat.initial;
+      // push stat
+      stats.push(stat);
     }
-    // sort stats
-    stats.sort(function (a, b) {
-      if (a.size > b.size) return -1;
-      return 1;
-    });
-    // process stats
-    for (var s = 0; s < stats.length; s += 1) {
-      // initialize
-      gain.level = 0;
-      var level = stats[s].level;
-      var leftIndex = 0;
-      var rightIndex = level.length - 1;
-      // compress
-      do {
-        // check level gain
-        if (gain.level > 0) {
-          gain.total += gain.level;
-          level[leftIndex].layout.left += gain.level;
-          level[rightIndex].layout.left -= gain.level;
-          gain.level = 0;
+
+    // check node groups children overlaps
+    var overlaps = []
+    for (var i = 0; i < stats.length; i += 1) {
+      if (stats[i].size > 0) {
+        overlaps.push(stats[i]);
+      }
+    }
+    for (var i = 0; i < overlaps.length - 1; i += 1) {
+      // compute overlap
+      var overlap = params.spacing.left
+        + overlaps[i].target
+        + overlaps[i].size
+        - overlaps[i + 1].target;
+      if (overlap > 0) {
+        // process overlap
+        for (var j = 0; j <= i; j += 1) {
+          overlaps[j].target -= 0.5 * overlap;
         }
-        // compute left gain
-        gain.left = 0;
-        for (var l = leftIndex; l < rightIndex; l += 1) {
-          //todo: find first gap
-          //todo: find last/first constraint
-          //todo: return min constraint
-          gain.left = objective(level[l], level[l + 1]);
-          if (gain.left > 0) {
-            leftIndex = l;
-            break;
+        for (var j = i + 1; j < overlaps.length; j += 1) {
+          overlaps[j].target += 0.5 * overlap;
+        }
+      }
+    }
+
+    // update node groups children coordinates
+    for (var i = 0; i < groups.length; i += 1) {
+      var target = stats[i].target;
+      var children = groups[i].children;
+      for (var k = 0; k < children.length; k += 1) {
+        // update coordinates
+        children[k].layout.coordinates = [
+          target,
+          groups[i].layout.top()
+            + params.template.height
+            + params.spacing.top,
+        ];
+        // increment target coordinate
+        if (k < children.length - 1) {
+          target += children[k].layout.width
+            + children[k].layout.margins[1]
+            + children[k + 1].layout.margins[0];
+        }
+      }
+    }
+
+    // update node groups parent coordinates
+    for (var p = l; p > 0; p -= 1) {
+      // process parents
+      var parents = this.levels[p];
+      for (var i = 0; i < parents.length; i += 1) {
+        // check children
+        var children = parents[i].children;
+        if (children.length > 0) {
+          // compute range
+          var range = [
+            children[0].layout.left()
+              + Math.min(0, parents[i].layout.size() - parents[i].layout.width),
+            children[children.length - 1].layout.right()
+              - Math.min(
+                parents[i].layout.size(),
+                parents[i].layout.width,
+              ),
+          ];
+          // compute offset
+          var offset = Math.max(
+            range[0] - parents[i].layout.left(),
+            Math.min(
+              0,
+              range[1] - parents[i].layout.left()
+            ),
+          );
+          // check offset
+          if (offset > 0) {
+            // update parent left coordinate
+            parents[i].layout.coordinates[0] += offset;
+            // update next parents left coordinate
+            for (var j = i + 1; j < parents.length; j += 1) {
+              var constraint = parents[j - 1].layout.right()
+                + parents[j - 1].layout.margins[1]
+                - parents[j].layout.left()
+                + parents[j].layout.margins[0]
+              if (constraint > 0) {
+                // update next parent left coordinate
+                parents[j].layout.coordinates[0] += constraint;
+              } else {
+                break;
+              }
+            }
+          } else if (offset < 0) {
+            // update parent coordinate
+            parents[i].layout.coordinates[0] += offset;
+            // update previous parents left coordinate
+            for (var j = i - 1; j >= 0; j -= 1) {
+              var constraint = parents[j + 1].layout.left()
+                - parents[j + 1].layout.margins[0]
+                - parents[j].layout.right()
+                - parents[j].layout.margins[1]
+              if (constraint < 0) {
+                // update previous parent left coordinate
+                parents[j].layout.coordinates[0] += constraint;
+              } else {
+                break;
+              }
+            }
           }
         }
-        // compute right gain
-        gain.right = 0
-        for (var l = rightIndex; l > leftIndex; l -= 1) {
-          //todo: find first gap
-          //todo: find last/first constraint
-          //todo: return min constraint
-          gain.right = objective(level[l], level[l - 1]);
-          if (gain.right > 0) {
-            rightIndex = l;
-            break;
-          }
-        }
-        // compute level gain
-        gain.level = Math.min(gain.left, gain.right);
-        if (leftIndex === rightIndex - 1) gain.level *= 0.5
-        gain.level = 0.01 * Math.round(100 * gain.level);
-      } while (gain.level > 0)
+      }
     }
-  } while (gain.total > 0)
+  }
 };
+
+
+
+
+
+
+    // // index of level change (check option 2)
+    // var levelIndexes = [];
+    // for (var ll = 0; ll <= l; ll += 1) {
+    //   levelIndexes.push([
+    //     0,
+    //     this.levels[ll].length - 1
+    //   ]);
+    // }
+//
+    // for (var i = 0; i < groups.length; i += 1) {
+//
+    //   // check spread (option 1)
+    //   // var spread = 0;
+    //   // if (stats[i].target < stats[i].range[0]) {
+    //   //   spread = stats[i].target - stats[i].range[0];
+    //   // } else if (stats[i].target > stats[i].range[1]) {
+    //   //   spread = stats[i].target - stats[i].range[1];
+    //   // }
+//
+    //   // option 2
+    //   var spread = stats[i].target - stats[i].initial;
+    //   if (spread !== 0) {
+    //     var parent = groups[i];
+    //     for (var ll = l; ll > 0; ll -= 1) {
+    //       var parents = this.levels[ll];
+    //       if (spread < 0) {
+    //         //alert(spread)
+    //         for (var ii = levelIndexes[ll][0]; ii <= parent.layout.index; ii += 1) {
+    //           parents[ii].layout.coordinates[0] += spread;
+    //         }
+    //         levelIndexes[ll][0] = parent.layout.index + 1;
+    //       } else {
+    //         for (var ii = parent.layout.index; ii <= levelIndexes[ll][1]; ii += 1) {
+    //           parents[ii].layout.coordinates[0] += spread;
+    //         }
+    //         levelIndexes[ll][1] = parent.layout.index - 1;
+    //       }
+//
+    //       parent = parent.parent;
+    //     }
+    //   }
+    // }
+
+
+
+
+
+
+  // put middle coord (center) first and last
+  // compute overlaps next both side
+  // recenter with all previous levels min max left
+
+
+  // // process levels layout size and margins
+  // for (var l = this.levels.length - 1; l >= 0; l -= 1) {
+  //   var groups = this.levels[l];
+  //   for (var i = 0; i < groups.length; i += 1) {
+  //     var nodes = groups[i].nodes();
+  //     // update width
+  //     groups[i].layout.width = nodes.length * params.template.width;
+  //     // update size
+  //     for (var k = 0; k < groups[i].children.length; k += 1) {
+  //       // size and width
+  //       groups[i].layout.size += Math.max(
+  //         groups[i].children[k].layout.size,
+  //         groups[i].children[k].layout.width,
+  //       );
+  //       // margins
+  //       groups[i].layout.size += groups[i].children[k].layout.margins[0]
+  //         + groups[i].children[k].layout.margins[1];
+  //     }
+  //     // update margins
+  //     groups[i].layout.margins = [
+  //       i > 0 && groups[i].parent === groups[i - 1].parent
+  //         ? 0.5 * params.spacing.left * params.phi
+  //         : 0.5 * params.spacing.left,
+  //       i < groups.length - 1 && groups[i].parent === groups[i + 1].parent
+  //         ? 0.5 * params.spacing.left * params.phi
+  //         : 0.5 * params.spacing.left,
+  //     ];
+  //   }
+  // }
+//
+  // // process levels layout coordinates
+  // for (var l = 1; l < this.levels.length; l += 1) {
+  //   var groups = this.levels[l];
+  //   var offset, padding;
+  //   for (var i = 0; i < groups.length; i += 1) {
+  //     // initialize offset
+  //     if (i === 0 || groups[i - 1].parent !== groups[i].parent) {
+  //       offset = groups[i].parent.layout.left
+  //         - (0.5 * groups[i].parent.layout.size)
+  //         + (0.5 * groups[i].parent.layout.width);
+  //     }
+  //     // initialize padding
+  //     padding = Math.max(0, 0.5 * (groups[i].layout.size - groups[i].layout.width));
+  //     // increment start offset
+  //     offset += groups[i].layout.margins[0] + padding;
+  //     // update coordinates
+  //     groups[i].layout.left = offset;
+  //     groups[i].layout.top = groups[i].parent.layout.top
+  //       + params.template.height
+  //       + params.spacing.top;
+  //     // increment offset
+  //     offset += groups[i].layout.width;
+  //     // increment end offset
+  //     offset += groups[i].layout.margins[1] + padding;
+  //   }
+  // }
+
+
+
+
+
+
+
+// /**
+//  * Compress tree.
+//  */
+// Tree.prototype.compress = function () {
+//   /**
+//    * Compute the node moving constraint.
+//    * @param {NodeGroup} a The anchor node group.
+//    * @param {number} way The way (0: backward, 1: forward).
+//    * @returns
+//    */
+//   function constraint(a, way) {
+//     // initialize
+//     var value = Number.MAX_VALUE;
+//     //todo: freedom parameter
+//     const parentFreedom = Math.max(
+//       params.template.width,
+//       a.parent.layout.width
+//         - a.parent.layout.size
+//         + a.parent.children[0].layout.margins[0]
+//         + a.parent.children[a.parent.children.length - 1].layout.margins[0],
+//     );
+//     const childrenFreedom = a.children.length === 0 ? 0 : Math.max(
+//       params.template.width,
+//       -a.layout.width
+//         - a.layout.size
+//         + a.children[0].layout.margins[0]
+//         + a.children[a.children.length - 1].layout.margins[0],
+//     );
+//     // parent
+//     if (way && a === a.parent.children[0]) {
+//       value = Math.min(
+//         value,
+//         a.parent.layout.left
+//           - a.layout.left
+//           + parentFreedom,
+//       );
+//     } else if (!way && a === a.parent.children[a.parent.children.length - 1]) {
+//       value = Math.min(
+//         value,
+//         a.layout.left
+//           + a.layout.width
+//           - a.parent.layout.left
+//           - a.parent.layout.width
+//           + parentFreedom,
+//       );
+//     }
+//     // children
+//     if (a.children.length > 0) {
+//       if (way) {
+//         value = Math.min(
+//           value,
+//           a.children[a.children.length - 1].layout.left
+//             + a.children[a.children.length - 1].layout.width
+//             - a.layout.left
+//             - a.layout.width
+//             + childrenFreedom,
+//         );
+//       } else {
+//         value = Math.min(
+//           value,
+//           a.layout.left
+//             - a.children[0].layout.left
+//             + childrenFreedom,
+//         );
+//       }
+//     }
+//     // return
+//     return value;
+//   }
+//
+//   /**
+//    * Compute the distance between two node groups (a to b).
+//    * @param {NodeGroup} a The anchor node group.
+//    * @param {NodeGroup} b The target node group.
+//    * @returns
+//    */
+//   function distance(a, b) {
+//     // initialize
+//     const way = a.layout.left < b.layout.left ? 1 : 0;
+//     var value = 0;
+//     // distance
+//     if (way) {
+//       value = Math.max(
+//         value,
+//         b.layout.left
+//           - b.layout.margins[0]
+//           - a.layout.left
+//           - a.layout.width
+//           - a.layout.margins[1],
+//       );
+//     } else {
+//       value = Math.max(
+//         value,
+//         a.layout.left
+//           - a.layout.margins[0]
+//           - b.layout.left
+//           - b.layout.width
+//           - b.layout.margins[1],
+//       );
+//     }
+//     // return
+//     return value;
+//   }
+//
+//   /**
+//    * Compute the objective function between two node groups (a to b).
+//    * @param {NodeGroup} a The anchor node group.
+//    * @param {NodeGroup} b The target node group.
+//    * @returns
+//    */
+//   function objective(a, b) {
+//     // initialize
+//     const way = a.layout.left < b.layout.left ? 1 : 0;
+//     // round
+//     return 0.01 * Math.round(
+//       100 * Math.max(0, Math.min(constraint(a, way), distance(a, b))),
+//     );
+//   }
+//
+//   // compress
+//   var gain = {};
+//   do {
+//     // initialize
+//     gain.total = 0;
+//     // compute stats
+//     var stats = [];
+//     for (var l = 1; l < this.levels.length; l += 1) {
+//       var level = this.levels[l];
+//       stats.push({
+//         level: level,
+//         size: level[level.length - 1].layout.left
+//           + level[level.length - 1].layout.width
+//           - level[0].layout.left,
+//       });
+//     }
+//     // sort stats
+//     stats.sort(function (a, b) {
+//       if (a.size > b.size) return -1;
+//       return 1;
+//     });
+//     // process stats
+//     for (var s = 0; s < stats.length; s += 1) {
+//       // initialize
+//       gain.level = 0;
+//       var level = stats[s].level;
+//       var leftIndex = 0;
+//       var rightIndex = level.length - 1;
+//       // compress
+//       do {
+//         // check level gain
+//         if (gain.level > 0) {
+//           gain.total += gain.level;
+//           // increment left
+//           for (var i = leftIndex; i >= 0; i -= 1) {
+//             level[i].layout.left += Math.min(
+//               gain.level,
+//               objective(level[i], level[i + 1]),
+//             );
+//           }
+//           // increment right
+//           for (var i = rightIndex; i < level.length; i += 1) {
+//             level[i].layout.left -= Math.min(
+//               gain.level,
+//               objective(level[i], level[i - 1]),
+//             );
+//           }
+//           // initialize
+//           gain.level = 0;
+//         }
+//         // compute left gain
+//         gain.left = 0;
+//         for (var i = leftIndex; i < rightIndex; i += 1) {
+//           //todo: find first gap
+//           //todo: find last/first constraint
+//           //todo: return min constraint
+//           gain.left = objective(level[i], level[i + 1]);
+//           if (gain.left > 0) {
+//             leftIndex = i;
+//             //for (var k = 0; k < leftIndex; k += 1) {
+//             //  gain.left = Math.min(gain.left, constraint(level[k], 1));
+//             //}
+//             break;
+//           }
+//         }
+//         // compute right gain
+//         gain.right = 0
+//         for (var i = rightIndex; i > leftIndex; i -= 1) {
+//           //todo: find first gap
+//           //todo: find last/first constraint
+//           //todo: return min constraint
+//           gain.right = objective(level[i], level[i - 1]);
+//           if (gain.right > 0) {
+//             rightIndex = i;
+//             //for (var k = level.length - 1; k > rightIndex; k -= 1) {
+//             //  gain.right = Math.min(gain.right, constraint(level[k], 0));
+//             //}
+//             break;
+//           }
+//         }
+//         // compute level gain
+//         gain.level = Math.min(gain.left, gain.right);
+//         if (leftIndex === rightIndex - 1) gain.level *= 0.5
+//         gain.level = 0.01 * Math.round(100 * gain.level);
+//       } while (gain.level > 0)
+//     }
+//   } while (gain.total > 0)
+// };
 
 /**
  * Render the tree in the active document.
@@ -793,6 +1112,5 @@ Tree.prototype.render = function () {
 
   // render tree
   const tree = new Tree(data);
-  tree.compress();
   tree.render();
 })();

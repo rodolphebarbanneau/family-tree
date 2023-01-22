@@ -1,14 +1,16 @@
 {
+  "scale": 0.85,
+  "linkThreshold": 2,
   "origin": {
     "left": 594.50,
     "top": 90.00
   },
   "template": {
-    "width": 25.90,
-    "height": 16.00
+    "width": 23.90,
+    "height": 14.80
   },
   "spacing": {
-    "left": 9.9,
-    "top": 25.9
+    "left": 9.1,
+    "top": 38.7
   }
 }

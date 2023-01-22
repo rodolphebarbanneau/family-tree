@@ -38,15 +38,6 @@ const params = {
 
 
 /**
- * Get a folder path.
- * @returns The selected folder path.
- */
-function getFolder() {
-  return Folder.selectDialog('Please select the output folder:', Folder('~'));
-}
-
-
-/**
  * A tree node.
  * @param {string[]} record The input data record.
  * @returns The created tree node.
@@ -79,31 +70,41 @@ function Node(record) {
   this.wedding = null;
   // node parent id (ancestor if parent is lineage else spouse)
   this.parentId = null;
+  // coordinate left
+  this.left = null;
+  // coordinate top
+  this.top = null;
 
   /** Initialize node layout fields. */
   this.layout = (function (self) {
     return {
       // left coordinate
       left: function () {
-        if (self.group) {
-          // compute node index
-          var nodeIndex = 0;
-          const nodes = self.group.nodes();
-          while (
-            nodeIndex < nodes.length - 1
-            && nodes[nodeIndex] !== self
-          ) { nodeIndex += 1 }
-          return self.group.layout.left()
-            + (nodeIndex * params.template.width);
+        if (params.mode) {
+          if (self.group) {
+            // compute node index
+            var nodeIndex = 0;
+            const nodes = self.group.nodes();
+            while (
+              nodeIndex < nodes.length - 1
+              && nodes[nodeIndex] !== self
+            ) { nodeIndex += 1 }
+            return self.group.layout.left()
+              + (nodeIndex * params.template.width);
+          }
+          return 0;
         }
-        return 0;
+        return self.left;
       },
       // top coordinate
       top: function () {
-        if (self.group) {
-          return self.group.layout.top();
+        if (params.mode) {
+          if (self.group) {
+            return self.group.layout.top();
+          }
+          return 0;
         }
-        return 0;
+        return self.top;
       },
       // right coordinate
       right: function () {
@@ -145,6 +146,8 @@ Node.prototype.initialize = function (record) {
     this.death = nullify(record[7]);
     this.wedding = nullify(record[8]);
     this.parentId = nullify(record[9]);
+    this.left = parseFloat(record[10]);
+    this.top = parseFloat(record[11]);
   }
 };
 
@@ -211,11 +214,19 @@ function NodeGroup(node) {
       margins: [0, 0],
       // left coordinate
       left: function () {
-        return this.coordinates[0];
+        if (params.mode) {
+          return this.coordinates[0];
+        } else {
+          return self.lineage.left;
+        }
       },
       // top coordinate
       top: function () {
-        return this.coordinates[1];
+        if (params.mode) {
+          return this.coordinates[1];
+        } else {
+          return self.lineage.top;
+        }
       },
       // right coordinate
       right: function () {
@@ -354,6 +365,78 @@ Tree.prototype.initialize = function (data) {
     }
   }
 
+  /**
+   * Compute the offset between two node groups.
+   * @param {NodeGroup[]} groups - The node groups collection.
+   * @param {number} i The i-th index.
+   * @param {number} j The j-th index.
+   * @returns The node group offset.
+   */
+  function offsetGroup(groups, i, j) {
+    // compute offset
+    return Math.max(
+      0,
+      groups[i].layout.right()
+        + groups[i].layout.margins[1]
+        + groups[j].layout.margins[0]
+        - groups[j].layout.left(),
+    );
+  }
+
+  /**
+   * Compute the offset between a node group and its lineage chilren.
+   * @param {NodeGroup[]} groups - The node groups collection.
+   * @param {*} stats The node group stats collection.
+   * @param {number} i The i-th index.
+   * @returns The stat offset.
+   */
+  function offsetLineage(groups, stats, i) {
+    // compute left
+    var left;
+    if (stats) {
+      left = stats[i].target;
+    } else {
+      left = groups[i].children.length > 0
+        ? groups[i].children[0].layout.left()
+        : groups[i].layout.left();
+    }
+    // compute size
+    var size;
+    if (stats) {
+      size = stats[i].size;
+    } else {
+      size = groups[i].layout.size();
+    }
+    // compute range
+    const range = [
+      left + Math.min(0, size - groups[i].layout.width),
+      left + Math.max(0, size - groups[i].layout.width),
+    ];
+    // compute offset
+    return Math.max(
+      range[0] - groups[i].layout.left(),
+      Math.min(0, range[1] - groups[i].layout.left()),
+    );
+  }
+
+  /**
+   * Compute the offset between two node group chilren.
+   * @param {*} stats The node group stats collection.
+   * @param {number} i The i-th index.
+   * @param {number} j The j-th index.
+   * @returns The children offset.
+   */
+  function offsetChildren(stats, i, j) {
+    // compute offset
+    return Math.max(
+      0,
+      params.spacing.left
+        + stats[i].target
+        + stats[i].size
+        - stats[j].target,
+    );
+  }
+
   // create root node and group
   this.nodes.push(new Node());
   this.groups.push(new NodeGroup(this.nodes[0]));
@@ -417,6 +500,9 @@ Tree.prototype.initialize = function (data) {
         params.origin.left - (0.5 * params.template.width),
         params.origin.top - params.template.height,
       ];
+      // lineage
+      this.groups[0].lineage.left = this.groups[0].layout.coordinates[0];
+      this.groups[0].lineage.top = this.groups[0].layout.coordinates[1];
     }
 
     // process node groups children layout
@@ -471,27 +557,55 @@ Tree.prototype.initialize = function (data) {
       stats.push(stat);
     }
 
-    // check node groups children overlaps
-    var overlaps = []
-    for (var i = 0; i < stats.length; i += 1) {
-      if (stats[i].size > 0) {
-        overlaps.push(stats[i]);
-      }
-    }
-    for (var i = 0; i < overlaps.length - 1; i += 1) {
-      // compute overlap
-      var overlap = params.spacing.left
-        + overlaps[i].target
-        + overlaps[i].size
-        - overlaps[i + 1].target;
-      if (overlap > 0) {
+    // update node groups coordinates
+    var groupIndex = -1;
+    for (var i = 0; i < groups.length; i += 1) {
+      // check group index
+      if (groupIndex !== -1 && stats[i].size > 0) {
+        // compute overlap
+        var overlap = offsetChildren(stats, groupIndex, i);
         // process overlap
-        for (var j = 0; j <= i; j += 1) {
-          overlaps[j].target -= 0.5 * overlap;
+        if (overlap > 0) {
+          var childrenIndex;
+          // initialize previous children
+          stats[groupIndex].target -= 0.5 * overlap;
+          groups[groupIndex].layout.coordinates[0] += offsetLineage(groups, stats, groupIndex);
+          // process previous children offset
+          childrenIndex = groupIndex;
+          for (var j = groupIndex - 1; j >= 0; j -= 1) {
+            // add offset
+            stats[j].target -= offsetChildren(stats, j, childrenIndex);
+            groups[j].layout.coordinates[0] -= offsetGroup(groups, j, j + 1);
+            // check children
+            if (stats[j].size > 0) {
+              // add offset
+              // increment
+              childrenIndex = j;
+            }
+          }
+          // initialize next children
+          stats[i].target += 0.5 * overlap;
+          groups[i].layout.coordinates[0] += offsetLineage(groups, stats, i);
+          // process next children offset
+          childrenIndex = i;
+          for (var j = i + 1; j < groups.length; j += 1) {
+            // add offset
+            var offset = offsetGroup(groups, j - 1, j);
+            groups[j].layout.coordinates[0] += offset;
+            // check children
+            if (stats[j].size > 0) {
+              // add offset
+              stats[j].target += offset;
+              // increment
+              childrenIndex = j;
+            }
+          }
         }
-        for (var j = i + 1; j < overlaps.length; j += 1) {
-          overlaps[j].target += 0.5 * overlap;
-        }
+      }
+      // check stat size
+      if (stats[i].size > 0) {
+        // increment
+        groupIndex = i;
       }
     }
 
@@ -517,60 +631,34 @@ Tree.prototype.initialize = function (data) {
     }
 
     // update node groups parent coordinates
-    for (var p = l; p > 0; p -= 1) {
+    for (var p = l - 1; p > 0; p -= 1) {
       // process parents
       var parents = this.levels[p];
       for (var i = 0; i < parents.length; i += 1) {
         // check children
-        var children = parents[i].children;
-        if (children.length > 0) {
-          // compute range
-          var range = [
-            children[0].layout.left()
-              + Math.min(0, parents[i].layout.size() - parents[i].layout.width),
-            children[children.length - 1].layout.right()
-              - Math.min(
-                parents[i].layout.size(),
-                parents[i].layout.width,
-              ),
-          ];
-          // compute offset
-          var offset = Math.max(
-            range[0] - parents[i].layout.left(),
-            Math.min(
-              0,
-              range[1] - parents[i].layout.left()
-            ),
-          );
-          // check offset
-          if (offset > 0) {
-            // update parent left coordinate
-            parents[i].layout.coordinates[0] += offset;
+        if (parents[i].children.length > 0) {
+          // compute overlap
+          var overlap = offsetLineage(parents, null, i);
+          parents[i].layout.coordinates[0] += overlap;
+          // check overlap
+          if (overlap > 0) {
             // update next parents left coordinate
             for (var j = i + 1; j < parents.length; j += 1) {
-              var constraint = parents[j - 1].layout.right()
-                + parents[j - 1].layout.margins[1]
-                - parents[j].layout.left()
-                + parents[j].layout.margins[0]
-              if (constraint > 0) {
+              var offset = offsetGroup(parents, j - 1, j);
+              if (offset > 0) {
                 // update next parent left coordinate
-                parents[j].layout.coordinates[0] += constraint;
+                parents[j].layout.coordinates[0] += offset;
               } else {
                 break;
               }
             }
-          } else if (offset < 0) {
-            // update parent coordinate
-            parents[i].layout.coordinates[0] += offset;
+          } else if (overlap < 0) {
             // update previous parents left coordinate
             for (var j = i - 1; j >= 0; j -= 1) {
-              var constraint = parents[j + 1].layout.left()
-                - parents[j + 1].layout.margins[0]
-                - parents[j].layout.right()
-                - parents[j].layout.margins[1]
-              if (constraint < 0) {
+              var offset = offsetGroup(parents, j, j + 1);
+              if (offset > 0) {
                 // update previous parent left coordinate
-                parents[j].layout.coordinates[0] += constraint;
+                parents[j].layout.coordinates[0] -= offset;
               } else {
                 break;
               }
@@ -581,335 +669,6 @@ Tree.prototype.initialize = function (data) {
     }
   }
 };
-
-
-
-
-
-
-    // // index of level change (check option 2)
-    // var levelIndexes = [];
-    // for (var ll = 0; ll <= l; ll += 1) {
-    //   levelIndexes.push([
-    //     0,
-    //     this.levels[ll].length - 1
-    //   ]);
-    // }
-//
-    // for (var i = 0; i < groups.length; i += 1) {
-//
-    //   // check spread (option 1)
-    //   // var spread = 0;
-    //   // if (stats[i].target < stats[i].range[0]) {
-    //   //   spread = stats[i].target - stats[i].range[0];
-    //   // } else if (stats[i].target > stats[i].range[1]) {
-    //   //   spread = stats[i].target - stats[i].range[1];
-    //   // }
-//
-    //   // option 2
-    //   var spread = stats[i].target - stats[i].initial;
-    //   if (spread !== 0) {
-    //     var parent = groups[i];
-    //     for (var ll = l; ll > 0; ll -= 1) {
-    //       var parents = this.levels[ll];
-    //       if (spread < 0) {
-    //         //alert(spread)
-    //         for (var ii = levelIndexes[ll][0]; ii <= parent.layout.index; ii += 1) {
-    //           parents[ii].layout.coordinates[0] += spread;
-    //         }
-    //         levelIndexes[ll][0] = parent.layout.index + 1;
-    //       } else {
-    //         for (var ii = parent.layout.index; ii <= levelIndexes[ll][1]; ii += 1) {
-    //           parents[ii].layout.coordinates[0] += spread;
-    //         }
-    //         levelIndexes[ll][1] = parent.layout.index - 1;
-    //       }
-//
-    //       parent = parent.parent;
-    //     }
-    //   }
-    // }
-
-
-
-
-
-
-  // put middle coord (center) first and last
-  // compute overlaps next both side
-  // recenter with all previous levels min max left
-
-
-  // // process levels layout size and margins
-  // for (var l = this.levels.length - 1; l >= 0; l -= 1) {
-  //   var groups = this.levels[l];
-  //   for (var i = 0; i < groups.length; i += 1) {
-  //     var nodes = groups[i].nodes();
-  //     // update width
-  //     groups[i].layout.width = nodes.length * params.template.width;
-  //     // update size
-  //     for (var k = 0; k < groups[i].children.length; k += 1) {
-  //       // size and width
-  //       groups[i].layout.size += Math.max(
-  //         groups[i].children[k].layout.size,
-  //         groups[i].children[k].layout.width,
-  //       );
-  //       // margins
-  //       groups[i].layout.size += groups[i].children[k].layout.margins[0]
-  //         + groups[i].children[k].layout.margins[1];
-  //     }
-  //     // update margins
-  //     groups[i].layout.margins = [
-  //       i > 0 && groups[i].parent === groups[i - 1].parent
-  //         ? 0.5 * params.spacing.left * params.phi
-  //         : 0.5 * params.spacing.left,
-  //       i < groups.length - 1 && groups[i].parent === groups[i + 1].parent
-  //         ? 0.5 * params.spacing.left * params.phi
-  //         : 0.5 * params.spacing.left,
-  //     ];
-  //   }
-  // }
-//
-  // // process levels layout coordinates
-  // for (var l = 1; l < this.levels.length; l += 1) {
-  //   var groups = this.levels[l];
-  //   var offset, padding;
-  //   for (var i = 0; i < groups.length; i += 1) {
-  //     // initialize offset
-  //     if (i === 0 || groups[i - 1].parent !== groups[i].parent) {
-  //       offset = groups[i].parent.layout.left
-  //         - (0.5 * groups[i].parent.layout.size)
-  //         + (0.5 * groups[i].parent.layout.width);
-  //     }
-  //     // initialize padding
-  //     padding = Math.max(0, 0.5 * (groups[i].layout.size - groups[i].layout.width));
-  //     // increment start offset
-  //     offset += groups[i].layout.margins[0] + padding;
-  //     // update coordinates
-  //     groups[i].layout.left = offset;
-  //     groups[i].layout.top = groups[i].parent.layout.top
-  //       + params.template.height
-  //       + params.spacing.top;
-  //     // increment offset
-  //     offset += groups[i].layout.width;
-  //     // increment end offset
-  //     offset += groups[i].layout.margins[1] + padding;
-  //   }
-  // }
-
-
-
-
-
-
-
-// /**
-//  * Compress tree.
-//  */
-// Tree.prototype.compress = function () {
-//   /**
-//    * Compute the node moving constraint.
-//    * @param {NodeGroup} a The anchor node group.
-//    * @param {number} way The way (0: backward, 1: forward).
-//    * @returns
-//    */
-//   function constraint(a, way) {
-//     // initialize
-//     var value = Number.MAX_VALUE;
-//     //todo: freedom parameter
-//     const parentFreedom = Math.max(
-//       params.template.width,
-//       a.parent.layout.width
-//         - a.parent.layout.size
-//         + a.parent.children[0].layout.margins[0]
-//         + a.parent.children[a.parent.children.length - 1].layout.margins[0],
-//     );
-//     const childrenFreedom = a.children.length === 0 ? 0 : Math.max(
-//       params.template.width,
-//       -a.layout.width
-//         - a.layout.size
-//         + a.children[0].layout.margins[0]
-//         + a.children[a.children.length - 1].layout.margins[0],
-//     );
-//     // parent
-//     if (way && a === a.parent.children[0]) {
-//       value = Math.min(
-//         value,
-//         a.parent.layout.left
-//           - a.layout.left
-//           + parentFreedom,
-//       );
-//     } else if (!way && a === a.parent.children[a.parent.children.length - 1]) {
-//       value = Math.min(
-//         value,
-//         a.layout.left
-//           + a.layout.width
-//           - a.parent.layout.left
-//           - a.parent.layout.width
-//           + parentFreedom,
-//       );
-//     }
-//     // children
-//     if (a.children.length > 0) {
-//       if (way) {
-//         value = Math.min(
-//           value,
-//           a.children[a.children.length - 1].layout.left
-//             + a.children[a.children.length - 1].layout.width
-//             - a.layout.left
-//             - a.layout.width
-//             + childrenFreedom,
-//         );
-//       } else {
-//         value = Math.min(
-//           value,
-//           a.layout.left
-//             - a.children[0].layout.left
-//             + childrenFreedom,
-//         );
-//       }
-//     }
-//     // return
-//     return value;
-//   }
-//
-//   /**
-//    * Compute the distance between two node groups (a to b).
-//    * @param {NodeGroup} a The anchor node group.
-//    * @param {NodeGroup} b The target node group.
-//    * @returns
-//    */
-//   function distance(a, b) {
-//     // initialize
-//     const way = a.layout.left < b.layout.left ? 1 : 0;
-//     var value = 0;
-//     // distance
-//     if (way) {
-//       value = Math.max(
-//         value,
-//         b.layout.left
-//           - b.layout.margins[0]
-//           - a.layout.left
-//           - a.layout.width
-//           - a.layout.margins[1],
-//       );
-//     } else {
-//       value = Math.max(
-//         value,
-//         a.layout.left
-//           - a.layout.margins[0]
-//           - b.layout.left
-//           - b.layout.width
-//           - b.layout.margins[1],
-//       );
-//     }
-//     // return
-//     return value;
-//   }
-//
-//   /**
-//    * Compute the objective function between two node groups (a to b).
-//    * @param {NodeGroup} a The anchor node group.
-//    * @param {NodeGroup} b The target node group.
-//    * @returns
-//    */
-//   function objective(a, b) {
-//     // initialize
-//     const way = a.layout.left < b.layout.left ? 1 : 0;
-//     // round
-//     return 0.01 * Math.round(
-//       100 * Math.max(0, Math.min(constraint(a, way), distance(a, b))),
-//     );
-//   }
-//
-//   // compress
-//   var gain = {};
-//   do {
-//     // initialize
-//     gain.total = 0;
-//     // compute stats
-//     var stats = [];
-//     for (var l = 1; l < this.levels.length; l += 1) {
-//       var level = this.levels[l];
-//       stats.push({
-//         level: level,
-//         size: level[level.length - 1].layout.left
-//           + level[level.length - 1].layout.width
-//           - level[0].layout.left,
-//       });
-//     }
-//     // sort stats
-//     stats.sort(function (a, b) {
-//       if (a.size > b.size) return -1;
-//       return 1;
-//     });
-//     // process stats
-//     for (var s = 0; s < stats.length; s += 1) {
-//       // initialize
-//       gain.level = 0;
-//       var level = stats[s].level;
-//       var leftIndex = 0;
-//       var rightIndex = level.length - 1;
-//       // compress
-//       do {
-//         // check level gain
-//         if (gain.level > 0) {
-//           gain.total += gain.level;
-//           // increment left
-//           for (var i = leftIndex; i >= 0; i -= 1) {
-//             level[i].layout.left += Math.min(
-//               gain.level,
-//               objective(level[i], level[i + 1]),
-//             );
-//           }
-//           // increment right
-//           for (var i = rightIndex; i < level.length; i += 1) {
-//             level[i].layout.left -= Math.min(
-//               gain.level,
-//               objective(level[i], level[i - 1]),
-//             );
-//           }
-//           // initialize
-//           gain.level = 0;
-//         }
-//         // compute left gain
-//         gain.left = 0;
-//         for (var i = leftIndex; i < rightIndex; i += 1) {
-//           //todo: find first gap
-//           //todo: find last/first constraint
-//           //todo: return min constraint
-//           gain.left = objective(level[i], level[i + 1]);
-//           if (gain.left > 0) {
-//             leftIndex = i;
-//             //for (var k = 0; k < leftIndex; k += 1) {
-//             //  gain.left = Math.min(gain.left, constraint(level[k], 1));
-//             //}
-//             break;
-//           }
-//         }
-//         // compute right gain
-//         gain.right = 0
-//         for (var i = rightIndex; i > leftIndex; i -= 1) {
-//           //todo: find first gap
-//           //todo: find last/first constraint
-//           //todo: return min constraint
-//           gain.right = objective(level[i], level[i - 1]);
-//           if (gain.right > 0) {
-//             rightIndex = i;
-//             //for (var k = level.length - 1; k > rightIndex; k -= 1) {
-//             //  gain.right = Math.min(gain.right, constraint(level[k], 0));
-//             //}
-//             break;
-//           }
-//         }
-//         // compute level gain
-//         gain.level = Math.min(gain.left, gain.right);
-//         if (leftIndex === rightIndex - 1) gain.level *= 0.5
-//         gain.level = 0.01 * Math.round(100 * gain.level);
-//       } while (gain.level > 0)
-//     }
-//   } while (gain.total > 0)
-// };
 
 /**
  * Render the tree in the active document.
@@ -923,36 +682,43 @@ Tree.prototype.render = function () {
     // initialize
     const win = new Window(
       'palette',
-      'Populating family tree...',
+      'Importing family tree...',
       undefined,
       { closeButton: false },
     );
-    const tab = win.add('statictext');
-    tab.preferredSize = [450, -1];
-    const bar = win.add('progressbar', undefined, 0, steps);
-    bar.preferredSize = [450, -1];
+    win.tab = win.add('statictext');
+    win.tab.preferredSize = [450, -1];
+    win.bar = win.add('progressbar', undefined, 0, steps);
+    win.bar.preferredSize = [450, -1];
     // methods
     progress.close = function () { win.close(); };
-    progress.increment = function () { bar.value += 1; return bar.value; };
-    progress.message = function (message) { tab.text = message; win.update(); win.show(); };
+    progress.increment = function () { win.bar.value += 1; return win.bar.value; };
+    progress.message = function (message) { win.tab.text = message; win.update(); win.show(); };
     // show
     win.show();
   }
 
   /**
-   * Process a tree node group drawing.
+   * Process a tree node group import.
    * @param {*} context The context.
    * @param {NodeGroup} group The tree node group to process.
    */
   function process(context, group) {
     // coalesce value
     function coalesce(value, other) {
-      return value ? value : other;
+      return value !== null ? value : other;
     }
 
     // duplicate template item
     function duplicate(target, item) {
-      return item.duplicate(target, ElementPlacement.PLACEATBEGINNING);
+      // duplicate
+      const template = item.duplicate(
+        target,
+        ElementPlacement.PLACEATBEGINNING,
+      );
+      // scale
+      template.resize(100 * params.scale, 100 * params.scale);
+      return template;
     }
 
     // convert measure from millimeters to points
@@ -965,17 +731,23 @@ Tree.prototype.render = function () {
     const nodes = group.nodes();
     // initialize links ratio
     var ratios = [];
+    var threshold = 0;
     for (var i = 0; i < nodes.length; i += 1) {
       // push ratio
       if (i === 0) {
-        ratios.push(1);
+        ratios.push(params.phi);
       } else {
         ratios.push(ratios[i - 1]);
       }
       // check children lineage
       for (var k = 0; k < nodes[i].children.length; k += 1) {
         if (nodes[i].children[k].lineage) {
-          ratios[i] *= params.phi;
+          // increment ratio
+          if (threshold >= params.linkThreshold) {
+            ratios[i] *= params.phi;
+          }
+          // increment threshold
+          threshold += 1;
           break;
         }
       }
@@ -1000,11 +772,18 @@ Tree.prototype.render = function () {
         vector.left = mmToPoints(nodes[i].layout.left());
         vector.top = -mmToPoints(nodes[i].layout.top());
         // draw info template
+        vector = duplicate(draw.output, context.template.groupItems.info);
+        vector.textFrames.getByName('lineage').contents = coalesce(nodes[i].lineage, '');
+        vector.textFrames.getByName('sex').contents = coalesce(nodes[i].sex, '');
+        vector.textFrames.getByName('parent').contents = coalesce(nodes[i].parentId, '');
+        vector.textFrames.getByName('wedding').contents = coalesce(nodes[i].wedding, '');
+        vector.left = mmToPoints(nodes[i].layout.left());
+        vector.top = -mmToPoints(nodes[i].layout.top()) + vector.height;
+        // check info template wedding
         if (nodes[i].wedding) {
-          vector = duplicate(draw.output, context.template.groupItems.info);
-          vector.textFrames.getByName('wedding').contents = coalesce(nodes[i].wedding, '');
-          vector.left = mmToPoints(nodes[i].layout.left());
-          vector.top = -mmToPoints(nodes[i].layout.top() - (params.spacing.top * Math.pow(params.phi, 2)));
+          vector.hidden = false;
+        } else {
+          vector.hidden = true;
         }
       }
       // draw links
@@ -1074,8 +853,8 @@ Tree.prototype.render = function () {
     progress(steps);
     for (var l = this.levels.length - 1; l >= 0; l -= 1) {
       for (var i = this.levels[l].length - 1; i >= 0; i -= 1) {
-        // process node
-        progress.message('Drawing element ' + progress.increment() + '/' + steps + '...');
+        // process node group
+        progress.message('Importing node group element ' + progress.increment() + '/' + steps + '...');
         process(context, this.levels[l][i]);
       }
     }
@@ -1104,13 +883,31 @@ Tree.prototype.render = function () {
   for (var attribute in config) { params[attribute] = config[attribute]; }
   json.close();
 
-  // fetch data
-  const csv = new File(params.root + '/data/tree.csv');
-  csv.open('r');
-  const data = csv.read().split(/\r?\n/);
-  csv.close();
+  // initialize params config scale
+  params.template.width *= params.scale;
+  params.template.height *= params.scale;
+  params.spacing.left *= params.scale;
+  params.spacing.top *= params.scale;
+
+  // import data
+  var csv = File.openDialog('Please select a tree data file:', 'CSV:*.csv', false);
+  var data;
+  if (csv) {
+    csv.open('r');
+    data = csv.read().split(/\r?\n/);
+    csv.close();
+  }
+
+  // confirm mode
+  params.mode = confirm(
+    'Do you want to rebuild the tree entirely?',
+    true,
+    'Importing family tree...',
+  );
 
   // render tree
-  const tree = new Tree(data);
-  tree.render();
+  if (data) {
+    const tree = new Tree(data);
+    tree.render();
+  }
 })();

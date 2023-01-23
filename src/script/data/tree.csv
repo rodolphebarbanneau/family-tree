@@ -1,22 +1,22 @@
 check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordinate_left,coordinate_top
-1,#01-01,false,François,Baussay,male,,,,#01-02,538.93200709702,122.895
-1,#01-02,true,Agathe,Barbaneau,female,,,,,559.247007097019,122.895
-1,#01-03,true,Valentin,Barbaneau,male,,,,,584.3425,122.895
-1,#01-04,false,Catherine,Lefer,female,,,,#01-03,604.6575,122.895
-1,#01-05,true,Michel,Barbaneau,male,,,,,629.75299290298,122.895
+1,#01-01,false,François,Baussay,male,,,,#01-02,538.932007097021,122.895
+1,#01-02,true,Agathe,Barbaneau,female,,,,,559.24700709702,122.895
+1,#01-03,true,Valentin,Barbaneau,male,,,,,584.342500000002,122.895
+1,#01-04,false,Catherine,Lefer,female,,,,#01-03,604.657500000001,122.895
+1,#01-05,true,Michel,Barbaneau,male,,,,,629.752992902979,122.895
 1,#02-01,true,Jehan,Barbaneau,male,,,,#01-04,255.484113473086,168.37
 1,#02-02,false,Louise,Maujais,female,,,,#02-01,275.799113473086,168.37
-1,#02-03,false,Pierre,Simonnet,male,,,1596,#02-04,464.961973844826,168.37
-1,#02-04,true,Agathe,Barbaneau,female,,,,#01-04,485.276973844826,168.37
-1,#02-05,true,Michel,Barbaneau,male,,,,#01-04,643.597281266162,168.37
+1,#02-03,false,Pierre,Simonnet,male,,,1596,#02-04,464.961973844827,168.37
+1,#02-04,true,Agathe,Barbaneau,female,,,,#01-04,485.276973844825,168.37
+1,#02-05,true,Michel,Barbaneau,male,,,,#01-04,643.597281266163,168.37
 1,#02-06,false,Marie,Maugeais,female,,,,#02-05,663.912281266162,168.37
-1,#02-07,true,Gilles,Barbaneau,male,,,,#01-04,775.2760064796,168.37
-1,#02-08,false,Catherine,Maugeay,female,,,,#02-07,795.5910064796,168.37
-1,#02-09,true,Guillaume,Barbaneau,male,,,,#01-04,894.146992285562,168.37
-1,#02-10,false,Jehanne,Cuit,female,,,,#02-09,914.461992285561,168.37
-1,#02-11,true,François,Barbaneau,male,,1659,,#01-04,939.557485188542,168.37
-1,#02-12,false,Marie,Ollivier,female,,1668,,#02-11,959.872485188542,168.37
-1,#02-13,true,Jehan,Barbaneau,male,,,,#01-04,984.967978091524,168.37
+1,#02-07,true,Gilles,Barbaneau,male,,,,#01-04,775.276006479599,168.37
+1,#02-08,false,Catherine,Maugeay,female,,,,#02-07,795.591006479601,168.37
+1,#02-09,true,Guillaume,Barbaneau,male,,,,#01-04,894.146992285564,168.37
+1,#02-10,false,Jehanne,Cuit,female,,,,#02-09,914.461992285563,168.37
+1,#02-11,true,François,Barbaneau,male,,1659,,#01-04,939.557485188541,168.37
+1,#02-12,false,Marie,Ollivier,female,,1668,,#02-11,959.872485188544,168.37
+1,#02-13,true,Jehan,Barbaneau,male,,,,#01-04,984.967978091525,168.37
 1,#02-14,false,Anne,Prieur,female,,,,#02-13,1005.28297809152,168.37
 1,#03-01,true,Thomas,Barbaneau,male,1615,1684,,#02-02,91.2885263859966,213.845
 1,#03-02,false,Jehanne,Roy,female,,1664,,#03-01,111.603526385996,213.845
@@ -25,26 +25,26 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#03-05,false,Louis,Brunet,male,,,,#03-06,301.297799679137,213.845
 1,#03-06,true,Agathe,Barbaneau,female,,,,#02-02,321.612799679137,213.845
 1,#03-07,false,René,Simonnet,male,1607,1682,1651,#03-08,346.708292582117,213.845
-1,#03-08,true,Marie,Barbaneau,female,1610,,,#02-02,367.023292582117,213.845
-1,#03-09,true,Michel,Barbaneau,male,,1693,,#02-02,444.700017742549,213.845
-1,#03-10,false,Estor,Braseau,female,,1650,,#03-09,465.015017742549,213.845
-1,#03-11,false,Perrine,Simonet,female,,1652,1651,#03-09,485.330017742549,213.845
+1,#03-08,true,Marie,Barbaneau,female,1610,,,#02-02,367.023292582119,213.845
+1,#03-09,true,Michel,Barbaneau,male,,1693,,#02-02,444.70001774255,213.845
+1,#03-10,false,Estor,Braseau,female,,1650,,#03-09,465.015017742548,213.845
+1,#03-11,false,Perrine,Simonet,female,,1652,1651,#03-09,485.33001774255,213.845
 1,#03-12,false,Marie,Sabouraud,female,1632,1687,,#03-09,505.645017742549,213.845
-1,#03-13,true,Pierre,Barbaneau,male,1618,,,#02-06,631.309527770657,213.845
-1,#03-14,false,Marie,,female,,,,#03-13,651.624527770657,213.845
-1,#03-15,true,François,,male,,1652,,#02-06,676.720020673638,213.845
+1,#03-13,true,Pierre,Barbaneau,male,1618,,,#02-06,631.309527770656,213.845
+1,#03-14,false,Marie,,female,,,,#03-13,651.624527770658,213.845
+1,#03-15,true,François,,male,,1652,,#02-06,676.720020673637,213.845
 1,#03-16,true,Renée,,female,1612,,,#02-08,704.77002067364,213.845
-1,#03-17,false,Louis,Roy,male,,,,#03-18,729.865513576621,213.845
+1,#03-17,false,Louis,Roy,male,,,,#03-18,729.865513576622,213.845
 1,#03-18,true,Catherine,Barbaneau,female,1616,1683,,#02-08,750.18051357662,213.845
-1,#03-19,false,René,Nau,male,1607,1687,,#03-20,775.276006479601,213.845
+1,#03-19,false,René,Nau,male,1607,1687,,#03-20,775.276006479602,213.845
 1,#03-20,true,Marie,Barbaneau,female,1613,1693,,#02-08,795.591006479601,213.845
-1,#03-21,false,Pierre,Nau,male,1615,1685,,#03-22,820.686499382581,213.845
+1,#03-21,false,Pierre,Nau,male,1615,1685,,#03-22,820.68649938258,213.845
 1,#03-22,true,Marguerite,Barbaneau,female,1618,,,#02-08,841.001499382582,213.845
 1,#03-23,true,Michel,,male,1618,1621,,#02-08,866.096992285561,213.845
-1,#03-24,true,Marie,,female,1622,,,#02-10,894.146992285562,213.845
-1,#03-25,true,Michel,,male,1617,,,#02-10,919.242485188543,213.845
+1,#03-24,true,Marie,,female,1622,,,#02-10,894.146992285564,213.845
+1,#03-25,true,Michel,,male,1617,,,#02-10,919.242485188542,213.845
 1,#03-26,true,Jean,Barbaneau,male,1615,,,#02-14,975.010041280264,213.845
-1,#03-27,false,Catherine,Mouneron,female,1616,,1640,#03-26,995.325041280264,213.845
+1,#03-27,false,Catherine,Mouneron,female,1616,,1640,#03-26,995.325041280266,213.845
 1,#03-28,true,François,Barbaneau,male,1618,,,#02-14,1020.38543174578,213.845
 1,#04-01,true,Pierre,Barbaneau,male,1647,1695,,#03-02,81.6416489581848,259.32
 1,#04-02,false,Marguerite,Gaultier,female,,1687,,#04-01,101.956648958185,259.32
@@ -56,19 +56,19 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#04-08,true,Marie,Barbaneau,female,1651,,,#03-04,250.714884658134,259.32
 1,#04-09,true,Thomas,Barbaneau,male,1646,1717,,#03-04,275.810377561114,259.32
 1,#04-10,false,Françoise,Delezay,female,1643,,,#04-09,296.125377561114,259.32
-1,#04-11,false,Louis,Breton,male,,,,#04-12,367.023292582117,259.32
+1,#04-11,false,Louis,Breton,male,,,,#04-12,367.023292582119,259.32
 1,#04-12,true,Catherine,Barbaneau,female,1645,1675,,#03-10,387.338292582117,259.32
-1,#04-13,true,Marie,,female,1647,,,#03-10,412.433785485098,259.32
+1,#04-13,true,Marie,,female,1647,,,#03-10,412.433785485099,259.32
 1,#04-14,true,François,,male,1648,,,#03-10,437.529278388078,259.32
 1,#04-15,false,Pierre,Gourda,male,1645,,1687,#04-16,465.010862985858,259.32
-1,#04-16,true,Marie,Barbaneau,female,1660,1696,,#03-11,485.325862985858,259.32
-1,#04-17,true,Philippe,Barbaneau,male,1663,1735,,#03-11,510.292973944499,259.32
-1,#04-18,false,Judith,Meloche,female,1664,1733,,#04-17,530.607973944499,259.32
+1,#04-16,true,Marie,Barbaneau,female,1660,1696,,#03-11,485.325862985857,259.32
+1,#04-17,true,Philippe,Barbaneau,male,1663,1735,,#03-11,510.292973944498,259.32
+1,#04-18,false,Judith,Meloche,female,1664,1733,,#04-17,530.6079739445,259.32
 1,#04-19,true,Magdelaine,,female,1669,,,#03-11,555.703466847479,259.32
-1,#04-20,true,Catherine,,female,1673,,,#03-11,580.79895975046,259.32
-1,#04-21,true,Michel,,male,1651,,,#03-12,605.894452653441,259.32
-1,#04-22,true,Jean,,male,1643,,,#03-14,651.624527770657,259.32
-1,#04-23,true,Jacques,Barbaneau,male,,,,#03-27,975.010221717933,259.32
+1,#04-20,true,Catherine,,female,1673,,,#03-11,580.798959750461,259.32
+1,#04-21,true,Michel,,male,1651,,,#03-12,605.89445265344,259.32
+1,#04-22,true,Jean,,male,1643,,,#03-14,651.624527770658,259.32
+1,#04-23,true,Jacques,Barbaneau,male,,,,#03-27,975.010221717934,259.32
 1,#04-24,false,Louise,Coustre,female,1646,1683,1679,#04-23,995.325221717933,259.32
 1,#04-25,false,Magdelaine,Joquin,female,,,1685,#04-23,1015.64022171793,259.32
 1,#05-01,true,François,,male,1677,,,#04-02,46.9964343372707,304.795
@@ -83,15 +83,15 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#05-10,true,Louis,Barbaneau,male,1683,1732,,#04-10,275.810377561114,304.795
 1,#05-11,false,Catherine,Naud,female,1685,1753,1707,#05-10,296.125377561114,304.795
 1,#05-12,true,Philippe,Barbaneau,male,1691,1769,,#04-18,432.748492902981,304.795
-1,#05-13,false,Catherine,Gerbier,female,,,1718,#05-12,453.063492902981,304.795
+1,#05-13,false,Catherine,Gerbier,female,,,1718,#05-12,453.06349290298,304.795
 1,#05-14,false,Jean,Naud,male,1689,1739,1718,#05-15,556.987482284163,304.795
-1,#05-15,true,Jeanne,Barbaneau,female,1696,1764,,#04-18,577.302482284164,304.795
-1,#05-16,false,Pierre,Pelletier,male,,1727,1718,#05-18,602.397975187143,304.795
-1,#05-17,false,Estienne,Bachelier,male,1692,1762,1730,#05-18,622.712975187144,304.795
-1,#05-18,true,Marie,Barbaneau,female,1694,,,#04-18,643.027975187146,304.795
-1,#05-19,true,Michel,Barbaneau,male,1705,1780,,#04-18,743.37384823703,304.795
-1,#05-20,false,Catherine Marie Anne,Gerbier,female,1707,1753,1729,#05-19,763.68884823703,304.795
-1,#05-21,true,Louise,,female,1679,,,#04-24,975.010221717933,304.795
+1,#05-15,true,Jeanne,Barbaneau,female,1696,1764,,#04-18,577.302482284165,304.795
+1,#05-16,false,Pierre,Pelletier,male,,1727,1718,#05-18,602.397975187144,304.795
+1,#05-17,false,Estienne,Bachelier,male,1692,1762,1730,#05-18,622.712975187143,304.795
+1,#05-18,true,Marie,Barbaneau,female,1694,,,#04-18,643.027975187145,304.795
+1,#05-19,true,Michel,Barbaneau,male,1705,1780,,#04-18,743.373848237029,304.795
+1,#05-20,false,Catherine Marie Anne,Gerbier,female,1707,1753,1729,#05-19,763.688848237031,304.795
+1,#05-21,true,Louise,,female,1679,,,#04-24,975.010221717934,304.795
 1,#05-22,true,Jacques,Barbaneau,male,1687,,,#04-25,1015.63999290299,304.795
 1,#05-23,false,Anne,Langlois,female,1693,,,#05-22,1035.95499290299,304.795
 1,#06-01,true,Catherine Louise,,female,1707,1715,,#05-11,100.141927240251,350.27
@@ -103,31 +103,31 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#06-07,true,Marguerite,,female,1711,1734,,#05-11,250.714884658134,350.27
 1,#06-08,true,Laurent,Barbaneau,male,,1764,,#05-11,275.810377561114,350.27
 1,#06-09,false,Marguerite,Paris,female,,1760,1745,#06-08,296.125377561114,350.27
-1,#06-10,false,Pierre,Marchaud,male,1731,,1760,#06-11,367.023,350.27
+1,#06-10,false,Pierre,Marchaud,male,1731,,1760,#06-11,367.023000000002,350.27
 1,#06-11,true,Catherine,Barbaneau,female,1737,1764,,#05-13,387.338,350.27
-1,#06-12,false,Laurens,Senne,male,,,1748,#06-13,412.43349290298,350.27
-1,#06-13,true,Marie,Barbaneau,female,1731,1750,,#05-13,432.74849290298,350.27
-1,#06-14,true,Philippe,,male,1724,1746,,#05-13,457.843985805961,350.27
-1,#06-15,true,René,,male,1728,1728,,#05-13,482.939478708941,350.27
+1,#06-12,false,Laurens,Senne,male,,,1748,#06-13,412.433492902979,350.27
+1,#06-13,true,Marie,Barbaneau,female,1731,1750,,#05-13,432.748492902981,350.27
+1,#06-14,true,Philippe,,male,1724,1746,,#05-13,457.84398580596,350.27
+1,#06-15,true,René,,male,1728,1728,,#05-13,482.939478708942,350.27
 1,#06-16,true,Françoise,,female,1734,,,#05-13,508.034971611921,350.27
-1,#06-17,true,Philippe,,male,1730,,,#05-20,556.971978925112,350.27
-1,#06-18,true,Catherine,,female,1730,1754,,#05-20,582.067471828093,350.27
+1,#06-17,true,Philippe,,male,1730,,,#05-20,556.971978925113,350.27
+1,#06-18,true,Catherine,,female,1730,1754,,#05-20,582.067471828092,350.27
 1,#06-19,true,Marie Magdeleine,,female,1751,,,#05-20,607.162964731074,350.27
-1,#06-20,true,Pierre,Barbaneau,male,1744,1780,,#05-20,632.258457634054,350.27
+1,#06-20,true,Pierre,Barbaneau,male,1744,1780,,#05-20,632.258457634053,350.27
 1,#06-21,false,Françoise,Laidet,female,1746,1826,1769,#06-20,652.573457634055,350.27
 1,#06-22,false,Pierre,Martin,male,,,1760,#06-23,677.668950537034,350.27
-1,#06-23,true,Marie Anne,Barbaneau,female,1733,,,#05-20,697.983950537034,350.27
+1,#06-23,true,Marie Anne,Barbaneau,female,1733,,,#05-20,697.983950537033,350.27
 1,#06-24,false,Pierre,Simonnet,male,,,1770,#06-26,723.079443440015,350.27
-1,#06-25,false,Jean,Magnen,male,,,,#06-26,743.394443440015,350.27
-1,#06-26,true,Marie,Barbaneau,female,1749,1827,,#05-20,763.709443440015,350.27
-1,#06-27,true,Michel,,male,1742,1747,,#05-20,788.804936342995,350.27
+1,#06-25,false,Jean,Magnen,male,,,,#06-26,743.394443440014,350.27
+1,#06-26,true,Marie,Barbaneau,female,1749,1827,,#05-20,763.709443440016,350.27
+1,#06-27,true,Michel,,male,1742,1747,,#05-20,788.804936342994,350.27
 1,#06-28,true,Marie Magdeleine,,female,1738,1740,,#05-20,813.900429245976,350.27
-1,#06-29,true,Philippe,,male,1735,1740,,#05-20,838.995922148957,350.27
-1,#06-30,true,Catherine,,female,1752,,,#05-20,864.091415051938,350.27
-1,#06-31,true,Jacques Jacob,Barbaneau,male,1746,1829,,#05-20,889.186907954918,350.27
+1,#06-29,true,Philippe,,male,1735,1740,,#05-20,838.995922148959,350.27
+1,#06-30,true,Catherine,,female,1752,,,#05-20,864.091415051937,350.27
+1,#06-31,true,Jacques Jacob,Barbaneau,male,1746,1829,,#05-20,889.186907954916,350.27
 1,#06-32,false,Françoise Magdeleine Catherine,Laidet,female,1755,1796,1781,#06-31,909.501907954918,350.27
 1,#06-33,true,Jacques Jean,Barbanault,male,,,,#05-23,969.379728814953,350.27
-1,#06-34,false,Marguerite,Morin,female,,,1750,#06-33,989.694728814953,350.27
+1,#06-34,false,Marguerite,Morin,female,,,1750,#06-33,989.694728814952,350.27
 1,#06-35,true,Pierre,Barbaneau,male,,,,#05-23,1014.79022171793,350.27
 1,#06-36,false,Catherine,Morisson,female,,,1744,#06-35,1035.10522171793,350.27
 1,#06-37,true,François,Barbanault,male,,,,#05-23,1060.20071462091,350.27
@@ -138,60 +138,60 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#07-04,true,Anthoine,,male,1758,,,#06-09,250.714884658134,395.745
 1,#07-05,true,Alexis,Barbaneau,male,1755,1813,,#06-09,275.810377561114,395.745
 1,#07-06,false,Catherine Marguerite,Marchaud,female,1760,1829,1780,#07-05,296.125377561114,395.745
-1,#07-07,false,René Léonard,Martin,male,,,,#07-09,391.954360138894,395.745
-1,#07-08,false,Jean,Rousseau,male,,,1807,#07-09,412.269360138893,395.745
+1,#07-07,false,René Léonard,Martin,male,,,,#07-09,391.954360138893,395.745
+1,#07-08,false,Jean,Rousseau,male,,,1807,#07-09,412.269360138891,395.745
 1,#07-09,true,Marie Madeleine,Barbaneau,female,1779,1834,,#06-21,432.584360138894,395.745
-1,#07-10,true,Jacques,Barbaneau,male,1769,1843,,#06-21,457.679853041874,395.745
-1,#07-11,false,Marie,Herve,female,1769,,,#07-10,477.994853041874,395.745
-1,#07-12,true,Jean Pierre,,male,1778,1779,,#06-21,525.643188565413,395.745
-1,#07-13,true,Jean Baptiste,,male,1778,1778,,#06-21,550.738681468393,395.745
-1,#07-14,false,Jacques,Pelletan,male,,,,#07-15,575.834174371373,395.745
-1,#07-15,true,Françoise,Barbaneau,female,1773,,,#06-21,596.149174371374,395.745
-1,#07-16,false,René,Troton,male,,,,#07-17,621.244667274354,395.745
+1,#07-10,true,Jacques,Barbaneau,male,1769,1843,,#06-21,457.679853041872,395.745
+1,#07-11,false,Marie,Herve,female,1769,,,#07-10,477.994853041875,395.745
+1,#07-12,true,Jean Pierre,,male,1778,1779,,#06-21,525.643188565414,395.745
+1,#07-13,true,Jean Baptiste,,male,1778,1778,,#06-21,550.738681468392,395.745
+1,#07-14,false,Jacques,Pelletan,male,,,,#07-15,575.834174371374,395.745
+1,#07-15,true,Françoise,Barbaneau,female,1773,,,#06-21,596.149174371373,395.745
+1,#07-16,false,René,Troton,male,,,,#07-17,621.244667274355,395.745
 1,#07-17,true,Catherine,Barbaneau,female,1774,1849,,#06-21,641.559667274354,395.745
-1,#07-18,true,André,Barbaneau,male,1776,1854,,#06-21,694.646869850257,395.745
-1,#07-19,false,Catherine,Richard,female,,,,#07-18,714.961869850258,395.745
+1,#07-18,true,André,Barbaneau,male,1776,1854,,#06-21,694.646869850259,395.745
+1,#07-19,false,Catherine,Richard,female,,,,#07-18,714.961869850257,395.745
 1,#07-20,false,Victor,Brouillac,male,,,,#07-21,813.917395584751,395.745
-1,#07-21,true,Magdeleine Ursule,Barbaneau,female,1786,1870,,#06-32,834.232395584752,395.745
+1,#07-21,true,Magdeleine Ursule,Barbaneau,female,1786,1870,,#06-32,834.232395584753,395.745
 1,#07-22,true,Louis,,male,1791,,,#06-32,859.327888487732,395.745
-1,#07-23,true,Jacob,,male,1784,1793,,#06-32,884.423381390712,395.745
-1,#07-24,true,André,Barbaneau,male,1781,1845,,#06-32,909.518874293694,395.745
-1,#07-25,false,Catherine,Texier,female,1786,,1809,#07-24,929.833874293693,395.745
-1,#07-26,false,Jean,Poncharaud,male,1784,1869,,#07-27,954.929367196669,395.745
+1,#07-23,true,Jacob,,male,1784,1793,,#06-32,884.423381390714,395.745
+1,#07-24,true,André,Barbaneau,male,1781,1845,,#06-32,909.518874293696,395.745
+1,#07-25,false,Catherine,Texier,female,1786,,1809,#07-24,929.833874293695,395.745
+1,#07-26,false,Jean,Poncharaud,male,1784,1869,,#07-27,954.92936719667,395.745
 1,#07-27,true,Marie,Barbaneau,female,1789,1868,,#06-32,975.244367196669,395.745
-1,#08-01,false,Jean,Izembert,male,,,,#08-02,64.2924201432315,441.22
-1,#08-02,true,Françoise,Barbanneau,female,1804,1879,,#07-06,84.6074201432316,441.22
-1,#08-03,true,Alexis,Barbanneau,male,1791,1841,,#07-06,109.702913046212,441.22
-1,#08-04,false,François,Redien,male,,,,#08-05,134.798405949193,441.22
-1,#08-05,true,Marie,Barbanaud,female,1798,1874,,#07-06,155.113405949192,441.22
-1,#08-06,true,François,,male,1781,1782,,#07-06,180.208898852173,441.22
-1,#08-07,true,Marie Catherine,,female,1786,1788,,#07-06,205.304391755153,441.22
-1,#08-08,false,Jacques,Touret,male,,,,#08-09,230.399884658134,441.22
-1,#08-09,true,Marie Catherine,Barbaneau,female,,1839,,#07-06,250.714884658134,441.22
-1,#08-10,true,Pierre,Barbaneau,male,1783,1856,,#07-06,275.810377561114,441.22
-1,#08-11,false,Marie Catherine,Laidet,female,1787,1855,1810,#08-10,296.125377561114,441.22
-1,#08-12,true,Pierre Jean,Barbanneau,male,1800,,,#07-11,366.925221717933,441.22
-1,#08-13,false,Marie,Isambert,female,,,1829,#08-12,387.240221717935,441.22
-1,#08-14,false,Pierre François,Naud,male,1811,1897,1835,#08-15,412.278393422788,441.22
-1,#08-15,true,Magdeleine Ursule,Barbanneau,female,1808,1897,,#07-11,432.593393422788,441.22
-1,#08-16,false,Louis,Gelle,male,,,1839,#08-17,457.688886325768,441.22
-1,#08-17,true,Louise,Barbanneau,female,1799,,,#07-11,478.003886325769,441.22
-1,#08-18,false,André,Isambert,male,,,1829,#08-19,503.099379228749,441.22
-1,#08-19,true,Catherine,Barbanneau,female,1797,1877,,#07-11,523.414379228749,441.22
-1,#08-20,true,Jean,Barbaneau,male,1811,,,#07-19,551.467901286599,441.22
-1,#08-21,false,Catherine,Babout,female,1817,,1846,#08-20,571.782901286599,441.22
-1,#08-22,false,Michel,Martinet,male,,,,#08-23,646.827430469457,441.22
-1,#08-23,true,Madeleine,Barbaneau,female,1804,1871,,#07-19,667.142430469456,441.22
-1,#08-24,true,Pierre,Barbaneau,male,1800,1870,,#07-19,733.318314438817,441.22
-1,#08-25,false,Marie,Pelletier,female,,,1823,#08-24,753.633314438819,441.22
-1,#08-26,false,Pierre,Caquineau,male,,,1848,#08-27,851.511745798188,441.22
-1,#08-27,true,Catherine,Barbanneau,female,1825,,,#07-25,871.82674579819,441.22
-1,#08-28,true,André,Barbanneau,male,1815,1899,,#07-25,896.92223870117,441.22
-1,#08-29,false,Elise,Sabourin,female,1820,1876,1850,#08-28,917.237238701169,441.22
-1,#08-30,true,Auguste,Barbanneau,male,1821,1904,,#07-25,942.33273160415,441.22
-1,#08-31,false,Marie Marguerite,Baudin,female,1829,,1848,#08-30,962.64773160415,441.22
-1,#08-32,false,François,Bodin,male,,,1856,#08-33,987.743224507129,441.22
-1,#08-33,true,Marie Catherine,Barbanneau,female,1818,1903,,#07-25,1008.05822450713,441.22
+1,#08-01,false,Jean,Izembert,male,,,,#08-02,64.2924201432315,441.220000000002
+1,#08-02,true,Françoise,Barbanneau,female,1804,1879,,#07-06,84.6074201432316,441.220000000002
+1,#08-03,true,Alexis,Barbanneau,male,1791,1841,,#07-06,109.702913046212,441.220000000002
+1,#08-04,false,François,Redien,male,,,,#08-05,134.798405949193,441.220000000002
+1,#08-05,true,Marie,Barbanaud,female,1798,1874,,#07-06,155.113405949192,441.220000000002
+1,#08-06,true,François,,male,1781,1782,,#07-06,180.208898852173,441.220000000002
+1,#08-07,true,Marie Catherine,,female,1786,1788,,#07-06,205.304391755153,441.220000000002
+1,#08-08,false,Jacques,Touret,male,,,,#08-09,230.399884658134,441.220000000002
+1,#08-09,true,Marie Catherine,Barbaneau,female,,1839,,#07-06,250.714884658134,441.220000000002
+1,#08-10,true,Pierre,Barbaneau,male,1783,1856,,#07-06,275.810377561114,441.220000000002
+1,#08-11,false,Marie Catherine,Laidet,female,1787,1855,1810,#08-10,296.125377561114,441.220000000002
+1,#08-12,true,Pierre Jean,Barbanneau,male,1800,,,#07-11,366.925221717932,441.220000000002
+1,#08-13,false,Marie,Isambert,female,,,1829,#08-12,387.240221717934,441.220000000002
+1,#08-14,false,Pierre François,Naud,male,1811,1897,1835,#08-15,412.278393422789,441.220000000002
+1,#08-15,true,Magdeleine Ursule,Barbanneau,female,1808,1897,,#07-11,432.593393422788,441.220000000002
+1,#08-16,false,Louis,Gelle,male,,,1839,#08-17,457.688886325766,441.220000000002
+1,#08-17,true,Louise,Barbanneau,female,1799,,,#07-11,478.003886325769,441.220000000002
+1,#08-18,false,André,Isambert,male,,,1829,#08-19,503.099379228748,441.220000000002
+1,#08-19,true,Catherine,Barbanneau,female,1797,1877,,#07-11,523.41437922875,441.220000000002
+1,#08-20,true,Jean,Barbaneau,male,1811,,,#07-19,551.467901286599,441.220000000002
+1,#08-21,false,Catherine,Babout,female,1817,,1846,#08-20,571.782901286601,441.220000000002
+1,#08-22,false,Michel,Martinet,male,,,,#08-23,646.827430469456,441.220000000002
+1,#08-23,true,Madeleine,Barbaneau,female,1804,1871,,#07-19,667.142430469455,441.220000000002
+1,#08-24,true,Pierre,Barbaneau,male,1800,1870,,#07-19,733.318314438818,441.220000000002
+1,#08-25,false,Marie,Pelletier,female,,,1823,#08-24,753.63331443882,441.220000000002
+1,#08-26,false,Pierre,Caquineau,male,,,1848,#08-27,851.511745798188,441.220000000002
+1,#08-27,true,Catherine,Barbanneau,female,1825,,,#07-25,871.82674579819,441.220000000002
+1,#08-28,true,André,Barbanneau,male,1815,1899,,#07-25,896.922238701172,441.220000000002
+1,#08-29,false,Elise,Sabourin,female,1820,1876,1850,#08-28,917.23723870117,441.220000000002
+1,#08-30,true,Auguste,Barbanneau,male,1821,1904,,#07-25,942.332731604149,441.220000000002
+1,#08-31,false,Marie Marguerite,Baudin,female,1829,,1848,#08-30,962.647731604151,441.220000000002
+1,#08-32,false,François,Bodin,male,,,1856,#08-33,987.74322450713,441.220000000002
+1,#08-33,true,Marie Catherine,Barbanneau,female,1818,1903,,#07-25,1008.05822450713,441.220000000002
 1,#09-01,false,René,Valentin,male,1826,1901,,#09-02,71.87167662995,486.695
 1,#09-02,true,Catherine,Barbanneau,female,1823,1873,,#08-11,92.1866766299498,486.695
 1,#09-03,true,Pierre,Barbanneau,male,1820,1898,,#08-11,117.282169532931,486.695
@@ -201,85 +201,85 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#09-07,false,Marie Louise,Rousseau,female,1814,,1839,#09-06,206.277169532931,486.695
 1,#09-08,true,Paul Alexandre,Barbanneau,male,1815,1901,,#08-11,275.810377561115,486.695
 1,#09-09,false,Marie Catherine,Pailler,female,1816,,1843,#09-08,296.125377561115,486.695
-1,#09-10,false,Pierre Paul Victor,Neau,male,1838,1912,1866,#09-11,367.023,486.695
-1,#09-11,true,Marie Justine,Barbanneau,female,1837,1900,,#08-13,387.338,486.695
-1,#09-12,false,Amédée,Richard,male,1845,,,#09-13,480.961915480638,486.695
+1,#09-10,false,Pierre Paul Victor,Neau,male,1838,1912,1866,#09-11,366.925221717935,486.695
+1,#09-11,true,Marie Justine,Barbanneau,female,1837,1900,,#08-13,387.240221717934,486.695
+1,#09-12,false,Amédée,Richard,male,1845,,,#09-13,480.961915480639,486.695
 1,#09-13,true,Augustine,Barbanneau,female,1851,1880,,#08-21,501.276915480638,486.695
-1,#09-14,true,Pierre Victor,,male,1852,1876,,#08-21,526.372408383619,486.695
+1,#09-14,true,Pierre Victor,,male,1852,1876,,#08-21,526.37240838362,486.695
 1,#09-15,true,Gabriel,Barbaneaud,male,1846,1916,,#08-21,551.467901286599,486.695
-1,#09-16,false,Alexandrine,Naud,female,,,,#09-15,571.782901286599,486.695
-1,#09-17,true,Alphonse,Barbanneau,male,1833,1914,,#08-25,624.904830530053,486.695
-1,#09-18,false,Elisabeth Celestine,Arrignon,female,,,1866,#09-17,645.219830530053,486.695
-1,#09-19,true,Alphonse,,male,1823,1825,,#08-25,708.753712851639,486.695
-1,#09-20,true,Pierre,Barbanneau,male,1831,1912,,#08-25,733.863279378444,486.695
-1,#09-21,false,Angélique,Gibouin,female,,,,#09-20,754.178279378443,486.695
+1,#09-16,false,Alexandrine,Naud,female,,,,#09-15,571.782901286601,486.695
+1,#09-17,true,Alphonse,Barbanneau,male,1833,1914,,#08-25,624.904830530052,486.695
+1,#09-18,false,Elisabeth Celestine,Arrignon,female,,,1866,#09-17,645.219830530054,486.695
+1,#09-19,true,Alphonse,,male,1823,1825,,#08-25,708.75371285164,486.695
+1,#09-20,true,Pierre,Barbanneau,male,1831,1912,,#08-25,733.863279378445,486.695
+1,#09-21,false,Angélique,Gibouin,female,,,,#09-20,754.178279378444,486.695
 1,#09-22,true,André,Barbanneau,male,1837,1907,,#08-25,831.044813687937,486.695
-1,#09-23,false,Madeleine,Proust,female,,,,#09-22,851.359813687937,486.695
-1,#09-24,false,Auguste,Babout,male,,,1879,#09-25,929.226096011626,486.695
+1,#09-23,false,Madeleine,Proust,female,,,,#09-22,851.359813687936,486.695
+1,#09-24,false,Auguste,Babout,male,,,1879,#09-25,929.226096011628,486.695
 1,#09-25,true,Augustine Louise,Barbanneau,female,1855,1941,,#08-31,949.54109601163,486.695
-1,#09-26,true,Léon Auguste,Barbanneau,male,1862,1931,,#08-31,974.63658891461,486.695
-1,#09-27,false,Marie Julie,Barbotin,female,,,1879,#09-26,994.95158891461,486.695
-1,#10-01,true,Charles,,male,1849,1863,,#09-04,67.0911837269698,532.17
-1,#10-02,false,Henri,Beraud,male,,,1876,#10-03,92.1866766299498,532.17
-1,#10-03,true,Rosalie Victorine,Barbanneau,female,1854,,,#09-04,112.50167662995,532.17
-1,#10-04,false,Etienne Frédéric,Gaillard,male,,,1869,#10-05,137.597169532931,532.17
-1,#10-05,true,Louise,Barbanneau,female,1850,1872,,#09-04,157.912169532931,532.17
-1,#10-06,true,Pierre,Barbanneau,male,1840,,,#09-07,206.277221717932,532.17
-1,#10-07,true,François Charles,Barbanneau,male,1851,,,#09-09,234.166736007042,532.17
-1,#10-08,false,Armandine,Chaudron,female,1853,,1876,#10-07,254.481736007042,532.17
-1,#10-09,true,Marie Catherine,,female,1844,1847,,#09-09,279.577228910022,532.17
-1,#10-10,true,Marie Louise,Barbanneau,female,1849,1928,,#09-09,304.672721813003,532.17
-1,#10-11,true,Paul Alexandre,Barbanneau,male,1854,1933,,#09-09,329.768214715982,532.17
-1,#10-12,false,Clémence,Redien,female,,,1880,#10-11,350.083214715983,532.17
-1,#10-13,true,Roger Bastien,Barbanneau,male,1889,,,#09-16,390.140929674677,532.17
-1,#10-14,false,Léa,Dupeux,female,,,1913,#10-13,410.455929674677,532.17
-1,#10-15,true,Louis Michel,Barbanneau,male,1883,1966,,#09-16,435.551422577658,532.17
-1,#10-16,false,Celestine,Betereau,female,,,1921,#10-15,455.866422577658,532.17
-1,#10-17,false,Louis,Dabirand,male,,,1892,#10-18,480.961915480638,532.17
-1,#10-18,true,Augustine,Barbanneau,female,1871,1930,,#09-16,501.276915480638,532.17
-1,#10-19,true,Gustave Gabriel,Barbanneau,male,1879,1942,,#09-16,526.372408383619,532.17
-1,#10-20,false,Marguerite,Thomelet,female,,,,#10-19,546.687408383619,532.17
-1,#10-21,true,Denise Marie Augustine,,female,1887,1892,,#09-16,571.782901286599,532.17
-1,#10-22,true,Alphonse Gustave,Barbanneau,male,1868,1936,,#09-18,611.744493832645,532.17
-1,#10-23,false,Irma,Cacault,female,,,1890,#10-22,632.059493832644,532.17
-1,#10-24,true,Marcelline Emma,,female,1869,1870,,#09-18,657.154986735625,532.17
-1,#10-25,true,Clarisse,,female,1861,,,#09-21,754.178279378443,532.17
-1,#10-26,true,Louis André,Barbanneau,male,1868,,,#09-23,785.634320784957,532.17
-1,#10-27,false,Marguerite,Chartier,female,,,,#10-26,805.949320784957,532.17
-1,#10-28,true,Théophile André,Barbanneau,male,1866,1945,,#09-23,949.9157994939,532.17
-1,#10-29,false,Victorina Maria,Andre,female,1869,1952,1889,#10-28,970.2307994939,532.17
-1,#11-01,true,Charles Adrien,Barbanneau,male,1876,1958,,#10-08,234.060039541555,577.645
-1,#11-02,false,Marie Pauline,Perrier,female,,,,#11-01,254.375039541555,577.645
-1,#11-03,true,Théophile Alexandre,Barbanneau,male,1882,1959,,#10-12,315.312605308386,577.645
-1,#11-04,false,Yvonne,Lardy,female,,,1908,#11-03,335.627605308387,577.645
-1,#11-05,true,Charles,Barbanneau,male,1885,,,#10-12,376.52860451439,577.645
-1,#11-06,false,Sidonie,Pie,female,1885,,1922,#11-05,396.84360451439,577.645
-1,#11-07,true,Raymond Joseph,Barbanneau,male,1901,1969,,#10-23,483.08777895569,577.645
-1,#11-08,false,Thérèse,Frocourt,female,1895,1949,1950,#11-07,503.40277895569,577.645
-1,#11-09,true,Emmanuel Gustave,Barbanneau,male,1894,1939,,#10-23,556.418208767797,577.645
-1,#11-10,false,Jeanne,Marplier,female,1893,1984,1919,#11-09,576.733208767798,577.645
-1,#11-11,false,Georges,Hillairet,male,,,1912,#11-12,629.802278813297,577.645
-1,#11-12,true,Valentine Valérie,Barbanneau,female,1891,1980,,#10-23,650.117278813296,577.645
-1,#11-13,true,Théophile Maxime,Barbanneau,male,1892,1968,,#10-27,690.00692593854,577.645
-1,#11-14,false,Berthe,Mathivaud,female,1897,,1938,#11-13,710.32192593854,577.645
-1,#11-15,true,Louis Raymond Henri,Barbanneau,male,1905,,,#10-27,735.41741884152,577.645
-1,#11-16,false,Yvette,Nicolas,female,1910,,1930,#11-15,755.73241884152,577.645
-1,#11-17,true,Camille,,female,1899,1923,,#10-27,780.853827881977,577.645
-1,#11-18,true,Paul Georges,Barbanneau,male,1901,,,#10-27,805.949320784958,577.645
-1,#11-19,false,Suzanne,Assailly,female,1904,,1923,#11-18,826.264320784958,577.645
-1,#11-20,true,Louis Théophile,Barbanneau,male,1891,1947,,#10-27,851.359813687938,577.645
-1,#11-21,false,Eugénie,Guilloteau,female,,,1921,#11-20,871.674813687938,577.645
-1,#11-22,true,Louis André,Barbanneau,male,1890,,,#10-27,896.770306590919,577.645
-1,#11-23,true,Théophile Alexandre,,male,1891,1896,,#10-29,924.820306590919,577.645
-1,#11-24,false,Fernand,Arrignon,male,,,1922,#11-25,949.915799493899,577.645
-1,#11-25,true,Alice Valentine,Barbanneau,female,1893,,,#10-29,970.230799493899,577.645
-1,#11-26,false,Henri,Marsault,male,,,1924,#11-27,995.326292396879,577.645
-1,#11-27,true,Mathilde Victorine,Barbanneau,female,1896,,,#10-29,1015.64129239688,577.645
-1,#11-28,false,Armand,Bordier,male,1894,,1919,#11-29,1040.73678529986,577.645
-1,#11-29,true,Jeanne Marie,Barbanneau,female,1898,,,#10-29,1061.05178529986,577.645
-1,#11-30,false,Paul,Boutin,male,,,1924,#11-31,1086.14727820284,577.645
-1,#11-31,true,Juliette,Barbanneau,female,1899,,,#10-29,1106.46227820284,577.645
-1,#11-32,true,Geneviève,Barbanneau,female,1890,,,#10-29,1131.55777110582,577.645
+1,#09-26,true,Léon Auguste,Barbanneau,male,1862,1931,,#08-31,974.636588914609,486.695
+1,#09-27,false,Marie Julie,Barbotin,female,,,1879,#09-26,994.951588914611,486.695
+1,#10-01,true,Charles,,male,1849,1863,,#09-04,67.0911837269698,532.169999999999
+1,#10-02,false,Henri,Beraud,male,,,1876,#10-03,92.1866766299498,532.169999999999
+1,#10-03,true,Rosalie Victorine,Barbanneau,female,1854,,,#09-04,112.50167662995,532.169999999999
+1,#10-04,false,Etienne Frédéric,Gaillard,male,,,1869,#10-05,137.597169532931,532.169999999999
+1,#10-05,true,Louise,Barbanneau,female,1850,1872,,#09-04,157.912169532931,532.169999999999
+1,#10-06,true,Pierre,Barbanneau,male,1840,,,#09-07,206.277221717932,532.169999999999
+1,#10-07,true,François Charles,Barbanneau,male,1851,,,#09-09,234.166736007042,532.169999999999
+1,#10-08,false,Armandine,Chaudron,female,1853,,1876,#10-07,254.481736007042,532.169999999999
+1,#10-09,true,Marie Catherine,,female,1844,1847,,#09-09,279.577228910022,532.169999999999
+1,#10-10,true,Marie Louise,Barbanneau,female,1849,1928,,#09-09,304.672721813003,532.169999999999
+1,#10-11,true,Paul Alexandre,Barbanneau,male,1854,1933,,#09-09,329.768214715982,532.169999999999
+1,#10-12,false,Clémence,Redien,female,,,1880,#10-11,350.083214715983,532.169999999999
+1,#10-13,true,Roger Bastien,Barbanneau,male,1889,,,#09-16,390.140929674677,532.169999999999
+1,#10-14,false,Léa,Dupeux,female,,,1913,#10-13,410.455929674676,532.169999999999
+1,#10-15,true,Louis Michel,Barbanneau,male,1883,1966,,#09-16,435.551422577658,532.169999999999
+1,#10-16,false,Celestine,Betereau,female,,,1921,#10-15,455.866422577657,532.169999999999
+1,#10-17,false,Louis,Dabirand,male,,,1892,#10-18,480.961915480639,532.169999999999
+1,#10-18,true,Augustine,Barbanneau,female,1871,1930,,#09-16,501.276915480638,532.169999999999
+1,#10-19,true,Gustave Gabriel,Barbanneau,male,1879,1942,,#09-16,526.37240838362,532.169999999999
+1,#10-20,false,Marguerite,Thomelet,female,,,,#10-19,546.687408383619,532.169999999999
+1,#10-21,true,Denise Marie Augustine,,female,1887,1892,,#09-16,571.782901286601,532.169999999999
+1,#10-22,true,Alphonse Gustave,Barbanneau,male,1868,1936,,#09-18,611.744493832645,532.169999999999
+1,#10-23,false,Irma,Cacault,female,,,1890,#10-22,632.059493832644,532.169999999999
+1,#10-24,true,Marcelline Emma,,female,1869,1870,,#09-18,657.154986735626,532.169999999999
+1,#10-25,true,Clarisse,,female,1861,,,#09-21,754.178279378444,532.169999999999
+1,#10-26,true,Louis André,Barbanneau,male,1868,,,#09-23,785.634320784956,532.169999999999
+1,#10-27,false,Marguerite,Chartier,female,,,,#10-26,805.949320784959,532.169999999999
+1,#10-28,true,Théophile André,Barbanneau,male,1866,1945,,#09-23,949.915799493899,532.169999999999
+1,#10-29,false,Victorina Maria,Andre,female,1869,1952,1889,#10-28,970.230799493901,532.169999999999
+1,#11-01,true,Charles Adrien,Barbanneau,male,1876,1958,,#10-08,234.060039541555,577.645000000002
+1,#11-02,false,Marie Pauline,Perrier,female,,,,#11-01,254.375039541555,577.645000000002
+1,#11-03,true,Théophile Alexandre,Barbanneau,male,1882,1959,,#10-12,315.312605308386,577.645000000002
+1,#11-04,false,Yvonne,Lardy,female,,,1908,#11-03,335.627605308387,577.645000000002
+1,#11-05,true,Charles,Barbanneau,male,1885,,,#10-12,376.528604514391,577.645000000002
+1,#11-06,false,Sidonie,Pie,female,1885,,1922,#11-05,396.84360451439,577.645000000002
+1,#11-07,true,Raymond Joseph,Barbanneau,male,1901,1969,,#10-23,483.087778955691,577.645000000002
+1,#11-08,false,Thérèse,Frocourt,female,1895,1949,1950,#11-07,503.402778955689,577.645000000002
+1,#11-09,true,Emmanuel Gustave,Barbanneau,male,1894,1939,,#10-23,556.418208767797,577.645000000002
+1,#11-10,false,Jeanne,Marplier,female,1893,1984,1919,#11-09,576.733208767799,577.645000000002
+1,#11-11,false,Georges,Hillairet,male,,,1912,#11-12,629.802278813298,577.645000000002
+1,#11-12,true,Valentine Valérie,Barbanneau,female,1891,1980,,#10-23,650.117278813296,577.645000000002
+1,#11-13,true,Théophile Maxime,Barbanneau,male,1892,1968,,#10-27,690.006925938539,577.645000000002
+1,#11-14,false,Berthe,Mathivaud,female,1897,,1938,#11-13,710.321925938542,577.645000000002
+1,#11-15,true,Louis Raymond Henri,Barbanneau,male,1905,,,#10-27,735.41741884152,577.645000000002
+1,#11-16,false,Yvette,Nicolas,female,1910,,1930,#11-15,755.732418841518,577.645000000002
+1,#11-17,true,Camille,,female,1899,1923,,#10-27,780.853827881976,577.645000000002
+1,#11-18,true,Paul Georges,Barbanneau,male,1901,,,#10-27,805.949320784959,577.645000000002
+1,#11-19,false,Suzanne,Assailly,female,1904,,1923,#11-18,826.264320784957,577.645000000002
+1,#11-20,true,Louis Théophile,Barbanneau,male,1891,1947,,#10-27,851.35981368794,577.645000000002
+1,#11-21,false,Eugénie,Guilloteau,female,,,1921,#11-20,871.674813687939,577.645000000002
+1,#11-22,true,Louis André,Barbanneau,male,1890,,,#10-27,896.770306590921,577.645000000002
+1,#11-23,true,Théophile Alexandre,,male,1891,1896,,#10-29,924.82030659092,577.645000000002
+1,#11-24,false,Fernand,Arrignon,male,,,1922,#11-25,949.915799493899,577.645000000002
+1,#11-25,true,Alice Valentine,Barbanneau,female,1893,,,#10-29,970.230799493898,577.645000000002
+1,#11-26,false,Henri,Marsault,male,,,1924,#11-27,995.326292396879,577.645000000002
+1,#11-27,true,Mathilde Victorine,Barbanneau,female,1896,,,#10-29,1015.64129239688,577.645000000002
+1,#11-28,false,Armand,Bordier,male,1894,,1919,#11-29,1040.73678529986,577.645000000002
+1,#11-29,true,Jeanne Marie,Barbanneau,female,1898,,,#10-29,1061.05178529986,577.645000000002
+1,#11-30,false,Paul,Boutin,male,,,1924,#11-31,1086.14727820284,577.645000000002
+1,#11-31,true,Juliette,Barbanneau,female,1899,,,#10-29,1106.46227820284,577.645000000002
+1,#11-32,true,Geneviève,Barbanneau,female,1890,,,#10-29,1131.55777110582,577.645000000002
 1,#12-01,false,Roger,Pinaud,male,,,1926,#12-02,50.940996557501,623.12
 1,#12-02,true,Germaine,Barbanneau,female,,,,#11-02,71.2559965575012,623.12
 1,#12-03,true,Jean Marius Adrien,Barbanneau,male,1904,1940,,#11-02,96.3514894604809,623.12
@@ -293,55 +293,55 @@ check,id,lineage,first_name,last_name,sex,birth,death,wedding,parent_id,coordina
 1,#12-11,false,Maurice,Garnier,male,,,1930,#12-12,302.848615615083,623.12
 1,#12-12,true,Suzanne Andrée,Barbanneau,female,1909,,,#11-04,323.163615615082,623.12
 1,#12-13,true,Pierre André Maurice,Barbanneau,male,1913,,,#11-04,348.259108518063,623.12
-1,#12-14,false,Germaine,Picard,female,1917,,1942,#12-13,368.574108518063,623.12
+1,#12-14,false,Germaine,Picard,female,1917,,1942,#12-13,368.574108518062,623.12
 1,#12-15,true,Marie Sidonie,Barbanneau,female,1925,,,#11-06,396.843221717932,623.12
-1,#12-16,true,Andrée,Barbanneau,female,1925,,,#11-08,503.40277895569,623.12
-1,#12-17,false,Jean,Desnoyers,male,1921,2022,1951,#12-18,531.322715864817,623.12
+1,#12-16,true,Andrée,Barbanneau,female,1925,,,#11-08,503.402778955689,623.12
+1,#12-17,false,Jean,Desnoyers,male,1921,2022,1951,#12-18,531.322715864818,623.12
 1,#12-18,true,Janine,Barbanneau,female,1925,,,#11-10,551.637715864817,623.12
-1,#12-19,true,Michel Emile,Barbanneau,male,1920,2001,,#11-10,576.733208767798,623.12
+1,#12-19,true,Michel Emile,Barbanneau,male,1920,2001,,#11-10,576.733208767799,623.12
 1,#12-20,false,Andrée,Clavier,female,1920,2009,1942,#12-19,597.048208767798,623.12
 1,#12-21,true,Yves Camille,Barbanneau,male,1931,,,#11-16,735.41741884152,623.12
-1,#12-22,false,Micheline,Turpeau,female,,,1955,#12-21,755.73241884152,623.12
-1,#12-23,true,Paulette Suzanne,Barbanneau,female,1926,,,#11-19,790.909299599911,623.12
+1,#12-22,false,Micheline,Turpeau,female,,,1955,#12-21,755.732418841518,623.12
+1,#12-23,true,Paulette Suzanne,Barbanneau,female,1926,,,#11-19,790.909299599913,623.12
 1,#12-24,true,Camille Jacques,Barbanneau,male,1928,,,#11-19,816.004792502892,623.12
-1,#12-25,false,Nicole,Largeaud,female,,,1953,#12-24,836.319792502892,623.12
+1,#12-25,false,Nicole,Largeaud,female,,,1953,#12-24,836.319792502891,623.12
 1,#12-26,true,Georges Jean,Barbanneau,male,1925,,,#11-19,861.415285405873,623.12
-1,#13-01,false,Jacques,Lahitte,male,,,1954,#13-02,83.3263866701276,668.595
-1,#13-02,true,Monique,Barbanneau,female,1935,,,#12-04,103.641386670127,668.595
-1,#13-03,true,Jean Marie René,Barbanneau,male,1927,,,#12-04,128.736879573107,668.595
-1,#13-04,false,Gisèle,Adamo,female,,,1948,#13-03,149.051879573107,668.595
-1,#13-05,true,Yvan Henry Raoul,Barbanneau,male,1931,,,#12-08,208.964728814954,668.595
-1,#13-06,false,Yvette,Gueffier,female,,,1956,#13-05,229.279728814954,668.595
-1,#13-07,false,Jean,Biraud,male,1936,,1960,#13-08,285.707235911972,668.595
-1,#13-08,true,Monique,Barbanneau,female,1937,,,#12-14,306.022235911972,668.595
-1,#13-09,false,Daniel,Carlier,male,1941,,1967,#13-10,331.117728814952,668.595
-1,#13-10,true,Michelle,Barbanneau,female,1942,,,#12-14,351.432728814952,668.595
-1,#13-11,true,Jean Bernard Claude,Barbanneau,male,1948,,,#12-14,376.528221717933,668.595
-1,#13-12,false,Christiane,Juin,female,1948,,,#13-11,396.843221717932,668.595
-1,#13-13,true,Dominique,Barbanneau,male,1946,2011,,#12-20,496.088538484364,668.595
-1,#13-14,false,Monique,Gast,female,1947,,1969,#13-13,516.403538484364,668.595
-1,#13-15,false,Elisabeth,Mary,female,1965,,2001,#13-13,536.718538484364,668.595
-1,#13-16,false,Robert,Firmin,male,1945,,1981,#13-17,576.752024290325,668.595
-1,#13-17,true,Marie-Noëlle,Barbanneau,female,1952,,,#12-20,597.067024290325,668.595
-1,#13-18,true,Thierry,Barbanneau,male,1959,,,#12-20,636.187517193306,668.595
-1,#13-19,false,Nathalie,Mary,female,1961,,,#13-18,656.502517193306,668.595
-1,#14-01,true,Nadine,Barbanneau,female,1980,,,#13-12,296.461250106011,714.07
-1,#14-02,true,Didier,Barbanneau,male,1978,,,#13-12,321.556743008991,714.07
-1,#14-03,true,Stéphane,Barbanneau,male,1977,,,#13-12,346.652235911972,714.07
-1,#14-04,true,Christophe,Barbanneau,male,1973,,,#13-12,371.747728814952,714.07
-1,#14-05,true,Thierry,Barbanneau,male,1973,,,#13-12,396.843221717932,714.07
-1,#14-06,true,Frédéric,Barbanneau,male,1972,,,#13-14,453.100545581384,714.07
-1,#14-07,false,Aurélie,Lesieur,female,1979,,,#14-06,473.415545581383,714.07
-1,#14-08,true,Stéphanie,Barbanneau,female,1974,,,#13-14,498.511038484364,714.07
-1,#14-09,true,Victor,Barbanneau,male,1994,,,#13-15,523.606531387345,714.07
-1,#14-10,true,Lucas,Barbanneau,male,2006,,,#13-15,548.702024290325,714.07
-1,#14-11,false,Kerem,Guleryuz,male,1986,,2016,#14-12,576.752024290325,714.07
-1,#14-12,true,Amélie,Barbanneau,female,1989,,,#13-16,597.067024290325,714.07
-1,#14-13,true,Rodolphe,Barbanneau,male,1988,,,#13-19,625.117024290324,714.07
-1,#14-14,false,Paul,Bost,male,1989,,2019,#14-15,650.212517193305,714.07
-1,#14-15,true,Zoé,Barbanneau,female,1989,,,#13-19,670.527517193306,714.07
-1,#15-01,true,Maxime,Barbanneau,male,2003,,,#14-07,473.415545581383,759.545
-1,#15-02,true,Clémentine,Guleryuz,female,2017,,,#14-11,571.971531387345,759.545
+1,#13-01,false,Jacques,Lahitte,male,,,1954,#13-02,83.3263866701276,668.594999999999
+1,#13-02,true,Monique,Barbanneau,female,1935,,,#12-04,103.641386670127,668.594999999999
+1,#13-03,true,Jean Marie René,Barbanneau,male,1927,,,#12-04,128.736879573107,668.594999999999
+1,#13-04,false,Gisèle,Adamo,female,,,1948,#13-03,149.051879573107,668.594999999999
+1,#13-05,true,Yvan Henry Raoul,Barbanneau,male,1931,,,#12-08,208.964728814954,668.594999999999
+1,#13-06,false,Yvette,Gueffier,female,,,1956,#13-05,229.279728814954,668.594999999999
+1,#13-07,false,Jean,Biraud,male,1936,,1960,#13-08,285.707235911972,668.594999999999
+1,#13-08,true,Monique,Barbanneau,female,1937,,,#12-14,306.022235911972,668.594999999999
+1,#13-09,false,Daniel,Carlier,male,1941,,1967,#13-10,331.117728814952,668.594999999999
+1,#13-10,true,Michelle,Barbanneau,female,1942,,,#12-14,351.432728814952,668.594999999999
+1,#13-11,true,Jean Bernard Claude,Barbanneau,male,1948,,,#12-14,376.528221717934,668.594999999999
+1,#13-12,false,Christiane,Juin,female,1948,,,#13-11,396.843221717932,668.594999999999
+1,#13-13,true,Dominique,Barbanneau,male,1946,2011,,#12-20,496.088538484363,668.594999999999
+1,#13-14,false,Monique,Gast,female,1947,,1969,#13-13,516.403538484365,668.594999999999
+1,#13-15,false,Elisabeth,Mary,female,1965,,2001,#13-13,536.718538484364,668.594999999999
+1,#13-16,false,Robert,Firmin,male,1945,,1981,#13-17,576.752024290324,668.594999999999
+1,#13-17,true,Marie-Noëlle,Barbanneau,female,1952,,,#12-20,597.067024290326,668.594999999999
+1,#13-18,true,Thierry,Barbanneau,male,1959,,,#12-20,636.187517193305,668.594999999999
+1,#13-19,false,Nathalie,Mary,female,1961,,1988,#13-18,656.502517193307,668.594999999999
+1,#14-01,true,Nadine,Barbanneau,female,1980,,,#13-12,296.461250106011,714.070000000001
+1,#14-02,true,Didier,Barbanneau,male,1978,,,#13-12,321.556743008991,714.070000000001
+1,#14-03,true,Stéphane,Barbanneau,male,1977,,,#13-12,346.652235911972,714.070000000001
+1,#14-04,true,Christophe,Barbanneau,male,1973,,,#13-12,371.747728814954,714.070000000001
+1,#14-05,true,Thierry,Barbanneau,male,1973,,,#13-12,396.843221717932,714.070000000001
+1,#14-06,true,Frédéric,Barbanneau,male,1972,,,#13-14,453.100545581383,714.070000000001
+1,#14-07,false,Aurélie,Lesieur,female,1979,,,#14-06,473.415545581382,714.070000000001
+1,#14-08,true,Stéphanie,Barbanneau,female,1974,,,#13-14,498.511038484364,714.070000000001
+1,#14-09,true,Victor,Barbanneau,male,1994,,,#13-15,523.606531387346,714.070000000001
+1,#14-10,true,Lucas,Barbanneau,male,2006,,,#13-15,548.702024290325,714.070000000001
+1,#14-11,false,Kerem,Guleryuz,male,1986,,2016,#14-12,576.752024290324,714.070000000001
+1,#14-12,true,Amélie,Barbanneau,female,1989,,,#13-16,597.067024290326,714.070000000001
+1,#14-13,true,Rodolphe,Barbanneau,male,1988,,,#13-19,625.117024290325,714.070000000001
+1,#14-14,false,Paul,Bost,male,1989,,2019,#14-15,650.212517193304,714.070000000001
+1,#14-15,true,Zoé,Barbanneau,female,1989,,,#13-19,670.527517193306,714.070000000001
+1,#15-01,true,Maxime,Barbanneau,male,2003,,,#14-07,473.415545581382,759.545
+1,#15-02,true,Clémentine,Guleryuz,female,2017,,,#14-11,571.971531387344,759.545
 1,#15-03,true,Suzanne,Guleryuz,female,2019,,,#14-11,597.067024290326,759.545
-1,#15-04,true,Arthur,Bost,male,2019,,,#14-14,645.432024290326,759.545
+1,#15-04,true,Arthur,Bost,male,2019,,,#14-14,645.432024290328,759.545
 1,#15-05,true,Louis,Bost,male,2021,,,#14-14,670.527517193306,759.545

@@ -730,24 +730,21 @@ Tree.prototype.render = function () {
     // initialize nodes
     const nodes = group.nodes();
     // initialize links ratio
-    var ratios = [];
-    var threshold = 0;
+    var scales = [];
     for (var i = 0; i < nodes.length; i += 1) {
       // push ratio
       if (i === 0) {
-        ratios.push(params.phi);
+        scales.push(params.phi);
       } else {
-        ratios.push(ratios[i - 1]);
+        scales.push(scales[i - 1]);
       }
       // check children lineage
       for (var k = 0; k < nodes[i].children.length; k += 1) {
         if (nodes[i].children[k].lineage) {
           // increment ratio
-          if (threshold >= params.linkThreshold) {
-            ratios[i] *= params.phi;
+          if (params.linkScaling) {
+            scales[i] *= params.phi;
           }
-          // increment threshold
-          threshold += 1;
           break;
         }
       }
@@ -811,8 +808,8 @@ Tree.prototype.render = function () {
           item = vector.pathItems.getByName('line');
           item.setEntirePath([
             [coords.start.left, coords.start.top],
-            [coords.start.left, coords.start.top - mmToPoints(params.spacing.top * ratios[i])],
-            [coords.end.left, coords.start.top - mmToPoints(params.spacing.top * ratios[i])],
+            [coords.start.left, coords.start.top - mmToPoints(params.spacing.top * scales[i])],
+            [coords.end.left, coords.start.top - mmToPoints(params.spacing.top * scales[i])],
             [coords.end.left, coords.end.top]
           ]);
           // edit end item

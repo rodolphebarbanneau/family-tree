@@ -1,6 +1,6 @@
 {
   "scale": 0.85,
-  "linkThreshold": 2,
+  "linkScaling": false,
   "origin": {
     "left": 594.50,
     "top": 90.00
